@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live TV FZ - Official Control Center</title>
+<style>
+:root {
+--bg-body: #ebf0f5;
+--panel-bg: #ebf0f5;
+--text-main: #2d3748;
+--text-muted: #718096;
+--accent: #00b4d8;
+--accent-hover: #0096c7;
+--danger: #ef4444;
+--warning: #f59e0b;
+--shadow-light: #ffffff;
+--shadow-dark: #c5d1e0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+body {
+background-color: var(--bg-body); color: var(--text-main);
+min-height: 100vh; padding: 20px 15px;
+}
+
+.top-tiranga-strip {
+height: 4px; width: 100%;
+background: linear-gradient(90deg, #FF9933 33.33%, #ffffff 33.33%, #ffffff 66.66%, #138808 66.66%);
+margin-bottom: 25px; border-radius: 4px;
+}
+
+.container { width: 100%; max-width: 600px; margin: 0 auto; }
+
+.neumorph-card-login {
+background: var(--panel-bg);
+border-radius: 25px;
+padding: 35px 25px;
+box-shadow: 12px 12px 25px var(--shadow-dark), -12px -12px 25px var(--shadow-light);
+text-align: center;
+max-width: 420px;
+margin: 60px auto;
+}
+
+.avatar-circle {
+width: 70px; height: 70px; background: var(--panel-bg);
+border-radius: 50%; margin: 0 auto 15px auto;
+display: flex; align-items: center; justify-content: center;
+box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+font-size: 26px; color: var(--accent);
+}
+
+.neumorph-card-login h2 { font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 5px; }
+.neumorph-card-login p { font-size: 12px; color: var(--text-muted); margin-bottom: 25px; }
+
+.neumorph-input-group {
+position: relative; margin-bottom: 20px; text-align: left;
+}
+
+.neumorph-input {
+width: 100%; background: var(--panel-bg); border: none;
+padding: 14px 18px 14px 45px; border-radius: 30px;
+font-size: 14px; color: var(--text-main); outline: none;
+box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+}
+
+.input-icon { position: absolute; left: 16px; top: 15px; font-size: 16px; color: var(--text-muted); }
+
+.neumorph-btn {
+width: 100%; background: var(--accent); border: none;
+padding: 14px; border-radius: 30px; color: #fff; font-size: 15px;
+font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+margin-top: 10px;
+}
+
+#adminDashboard { display: none; width: 100%; }
+
+.dash-header {
+display: flex; justify-content: space-between; align-items: center;
+margin-bottom: 25px; background: var(--panel-bg); padding: 18px 22px;
+border-radius: 20px;
+box-shadow: 8px 8px 18px var(--shadow-dark), -8px -8px 18px var(--shadow-light);
+}
+
+.dash-card {
+background: var(--panel-bg); border-radius: 20px;
+padding: 22px; margin-bottom: 20px; color: var(--text-main);
+box-shadow: 8px 8px 18px var(--shadow-dark), -8px -8px 18px var(--shadow-light);
+}
+
+.dash-card h3 { font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; margin-bottom: 0; }
+
+.form-group { margin-bottom: 14px; text-align: left; }
+label { display: block; font-size: 10px; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
+
+input, select {
+width: 100%; background: var(--panel-bg); border: none;
+padding: 12px 16px; border-radius: 25px; color: var(--text-main); font-size: 13px; outline: none;
+box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+}
+
+.btn {
+background: var(--accent); color: #fff; border: none; padding: 9px 16px;
+border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer;
+display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+box-shadow: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
+}
+.btn-secondary { background: #e2e8f0; color: var(--text-main); }
+.btn-danger { background: var(--danger); color: #fff; }
+
+.hidden { display: none !important; }
+
+/* Perfect Compact Table Styles */
+.table-container { width: 100%; overflow: hidden; margin-top: 15px; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+th, td { padding: 10px 6px; text-align: left; border-bottom: 1px solid var(--shadow-dark); font-size: 11px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+th { color: var(--text-muted); font-size: 9px; text-transform: uppercase; }
+
+.actions-cell { display: flex; gap: 4px; align-items: center; }
+.action-sm { padding: 4px 8px; font-size: 10px; border-radius: 12px; cursor: pointer; border: none; font-weight: 700; }
+.edit-btn { background: var(--warning); color: #000; }
+.del-btn { background: var(--danger); color: #fff; }
+.empty-notice { text-align: center; color: var(--text-muted); padding: 15px; font-size: 12px; font-style: italic; }
+</style>
+</head>
+<body>
+
+<div class="container">
+<div class="top-tiranga-strip"></div>
+
+<!-- Login Section -->
+<div id="loginWrapper" class="neumorph-card-login">
+<div class="avatar-circle">📺</div>
+<h2>Admin Login</h2>
+<p>Live TV FZ Secure Control Center</p>
+
+<div class="neumorph-input-group">
+<span class="input-icon">👤</span>
+<input type="text" id="adminUser" class="neumorph-input" placeholder="Username">
+</div>
+
+<div class="neumorph-input-group">
+<span class="input-icon">🔒</span>
+<input type="password" id="adminPass" class="neumorph-input" placeholder="Password">
+</div>
+
+<button class="neumorph-btn" onclick="loginAdmin()">Login</button>
+<p id="loginError" style="color:var(--danger); font-size:11px; margin-top:12px; font-weight:700;"></p>
+</div>
+
+<!-- Admin Dashboard -->
+<div id="adminDashboard">
+<div class="dash-header">
+<h2 style="font-size:17px; color:var(--text-main); margin:0;">🛡️ Control Center</h2>
+<div style="display:flex; gap:8px;">
+<a href="index.html" class="btn btn-secondary" style="padding:7px 12px; font-size:11px;">⬅ App</a>
+<button class="btn btn-secondary" onclick="logoutAdmin()" style="padding:7px 12px; font-size:11px;">🚪 Logout</button>
+</div>
+</div>
+
+<!-- Greeting Popup Manager -->
+<div class="dash-card">
+<div style="display:flex; justify-content:space-between; align-items:center;">
+<h3>👋 Greeting Popup Manager</h3>
+<button class="btn btn-secondary" onclick="toggleSection('greetingFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+</div>
+<div id="greetingFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--shadow-dark); padding-top:15px;">
+<div class="form-group">
+<label>Main Title</label>
+<input type="text" id="greetingTitleInput" placeholder="Welcome LiveTV FZ">
+</div>
+<div class="form-group">
+<label>Powered By Text</label>
+<input type="text" id="greetingPoweredInput" placeholder="powered by Zubi Facts Creation's">
+</div>
+<button class="btn" onclick="saveGreeting()">Save Greeting Message</button>
+</div>
+</div>
+
+<!-- AdMob Manager -->
+<div class="dash-card">
+<div style="display:flex; justify-content:space-between; align-items:center;">
+<h3>💰 Google AdMob Banner Manager</h3>
+<button class="btn btn-secondary" onclick="toggleSection('adMobFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+</div>
+<div id="adMobFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--shadow-dark); padding-top:15px;">
+<div class="form-group">
+<label>AdMob Banner Unit ID</label>
+<input type="text" id="admobInput" placeholder="ca-app-pub-xxxxxxxx/xxxxxxxx">
+</div>
+<button class="btn" onclick="saveAdMob()">Save AdMob ID</button>
+</div>
+</div>
+
+<!-- Google AdSense Manager -->
+<div class="dash-card">
+<div style="display:flex; justify-content:space-between; align-items:center;">
+<h3>🎯 Google AdSense Manager</h3>
+<button class="btn btn-secondary" onclick="toggleSection('adSenseFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+</div>
+<div id="adSenseFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--shadow-dark); padding-top:15px;">
+<div class="form-group">
+<label>AdSense Slot / Client ID</label>
+<input type="text" id="adsenseInput" placeholder="ca-pub-xxxxxxxxxxxxxxxx">
+</div>
+<button class="btn" onclick="saveAdSense()">Save AdSense ID</button>
+</div>
+</div>
+
+<!-- Affiliate Links Manager -->
+<div class="dash-card">
+<div style="display:flex; justify-content:space-between; align-items:center;">
+<h3>🤝 Affiliate Links Manager</h3>
+<button class="btn btn-secondary" onclick="toggleSection('affiliateFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+</div>
+<div id="affiliateFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--shadow-dark); padding-top:15px;">
+<input type="hidden" id="editAffiliateIndex" value="-1">
+<div class="form-group">
+<label>Affiliate / Promotion Title</label>
+<input type="text" id="affiliateTitle" placeholder="e.g. Special Offer Product">
+</div>
+<div class="form-group">
+<label>Affiliate Target URL</label>
+<input type="text" id="affiliateUrl" placeholder="https://...">
+</div>
+<div style="display:flex; gap:8px;">
+<button class="btn" onclick="saveAffiliateLink()">Save Affiliate Link</button>
+<button class="btn btn-secondary" onclick="closeAffiliateForm()">Cancel</button>
+</div>
+</div>
+<div class="table-container" id="affiliateTableWrapper"></div>
+</div>
+
+<!-- Ticker Manager -->
+<div class="dash-card">
+<div style="display:flex; justify-content:space-between; align-items:center;">
+<h3>📢 Running Ticker Message</h3>
+<button class="btn btn-secondary" onclick="toggleSection('tickerFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+</div>
+<div id="tickerFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--shadow-dark); padding-top:15px;">
+<div class="form-group">
+<label>Ticker Announcement Text</label>
+<input type="text" id="tickerInput" placeholder="Enter ticker message...">
+</div>
+<button class="btn" onclick="saveTicker()">Publish Ticker</button>
+</div>
+</div>
+
+<!-- Social Links Manager -->
+<div class="dash-card">
+<div style="display:flex; justify-content:space-between; align-items:center;">
+<h3>🌐 Social & Facebook Links Manager</h3>
+<button class="btn btn-secondary" onclick="toggleSection('socialFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+</div>
+<div id="socialFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--shadow-dark); padding-top:15px;">
+<input type="hidden" id="editSocialIndex" value="-1">
+<div class="form-group">
+<label>Platform Type</label>
+<select id="socialPlatform">
+<option value="telegram">Telegram</option>
+<option value="whatsapp">WhatsApp</option>
+<option value="facebook">Facebook Page / Link</option>
+</select>
+</div>
+<div class="form-group">
+<label>Channel / Page Link URL</label>
+<input type="text" id="socialUrl" placeholder="https://...">
+</div>
+<div style="display:flex; gap:8px;">
+<button class="btn" onclick="saveSocialLink()">Save Link</button>
+<button class="btn btn-secondary" onclick="closeSocialForm()">Cancel</button>
+</div>
+</div>
+<div class="table-container" id="socialTableWrapper"></div>
+</div>
+
+<!-- Custom Streams Manager -->
+<div class="dash-card">
+<div style="display:flex; justify-content:space-between; align-items:center;">
+<h3>📺 Custom Streams & Pinned Channels</h3>
+<button class="btn btn-secondary" onclick="toggleSection('streamFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+</div>
+<div id="streamFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--shadow-dark); padding-top:15px;">
+<input type="hidden" id="editIndex" value="-1">
+<div class="form-group">
+<label>Channel / Stream Title</label>
+<input type="text" id="streamName" placeholder="e.g. My Live Channel">
+</div>
+<div class="form-group">
+<label>Stream URL (HLS .m3u8, YouTube, or FB Live)</label>
+<input type="text" id="streamUrl" placeholder="https://...">
+</div>
+<div class="form-group">
+<label>Custom Logo (Option 1: Image URL)</label>
+<input type="text" id="streamLogo" placeholder="https://.../logo.png">
+</div>
+<div class="form-group">
+<label>Custom Logo (Option 2: Browse Image JPG/PNG)</label>
+<input type="file" id="streamLogoFile" accept="image/png, image/jpeg, image/jpg" style="padding:8px; box-shadow:none; background:#fff; border-radius:15px;">
+</div>
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+<div class="form-group">
+<label>Category</label>
+<select id="streamCategory">
+<option value="news">News</option>
+<option value="sports">Sports</option>
+<option value="movies">Movies</option>
+<option value="entertainment">Entertainment</option>
+<option value="music">Music</option>
+<option value="kids">Kids</option>
+<option value="social">Social Live (YT/FB)</option>
+</select>
+</div>
+<div class="form-group">
+<label>Tag / Country Code</label>
+<input type="text" id="streamCountry" placeholder="in, pk, social">
+</div>
+</div>
+<div class="form-group" style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+<input type="checkbox" id="streamFeatured" style="width:16px; height:16px; accent-color:var(--accent);">
+<label for="streamFeatured" style="margin:0; color:var(--text-main); cursor:pointer; text-transform:none; font-size:11px;">⭐ Pin / Feature on absolute top</label>
+</div>
+<div style="display:flex; gap:8px; margin-top:10px;">
+<button class="btn" onclick="saveStream()">Save Stream</button>
+<button class="btn btn-secondary" onclick="closeStreamForm()">Cancel</button>
+</div>
+</div>
+<div class="table-container" id="streamsTableWrapper"></div>
+</div>
+
+<!-- Security Credentials -->
+<div class="dash-card" style="border: 1px solid rgba(239, 68, 68, 0.3);">
+<div style="display:flex; justify-content:space-between; align-items:center;">
+<div>
+<h3 style="color:var(--danger);">🔐 Security Credentials</h3>
+<div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Manage admin username & password</div>
+</div>
+<button class="btn btn-secondary" onclick="toggleSection('securityFormContainer', this)" style="font-size:10px; padding:6px 12px;">Modify Security</button>
+</div>
+<div id="securityFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--shadow-dark); padding-top:15px;">
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+<div class="form-group">
+<label>New Username</label>
+<input type="text" id="newAdminUser" placeholder="Username">
+</div>
+<div class="form-group">
+<label>New Password</label>
+<input type="password" id="newAdminPass" placeholder="Password">
+</div>
+</div>
+<button class="btn" onclick="saveCredentials()">Update Credentials</button>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+if(localStorage.getItem('fz_admin_logged') === 'true') {
+showDashboard();
+}
+});
+
+function loginAdmin() {
+const user = document.getElementById('adminUser').value.trim();
+const pass = document.getElementById('adminPass').value.trim();
+const savedUser = localStorage.getItem('fz_admin_user') || 'admin';
+const savedPass = localStorage.getItem('fz_admin_pass') || 'admin@2876';
+
+if(user === savedUser && pass === savedPass) {
+localStorage.setItem('fz_admin_logged', 'true');
+showDashboard();
+} else {
+document.getElementById('loginError').innerText = 'Invalid Username or Password';
+}
+}
+
+function logoutAdmin() {
+localStorage.removeItem('fz_admin_logged');
+document.getElementById('adminDashboard').style.display = 'none';
+document.getElementById('loginWrapper').style.display = 'block';
+document.getElementById('adminUser').value = '';
+document.getElementById('adminPass').value = '';
+}
+
+function showDashboard() {
+document.getElementById('loginWrapper').style.display = 'none';
+document.getElementById('adminDashboard').style.display = 'block';
+loadAds();
+loadGreeting();
+loadTicker();
+loadAffiliateLinks();
+loadSocialLinks();
+loadStreams();
+}
+
+function toggleSection(containerId, btnElement) {
+const container = document.getElementById(containerId);
+if(container.classList.contains('hidden')) {
+container.classList.remove('hidden');
+if(btnElement) btnElement.innerText = '- Close Trigger';
+} else {
+container.classList.add('hidden');
+if(btnElement) btnElement.innerText = '+ Open Trigger';
+}
+}
+
+function loadGreeting() {
+document.getElementById('greetingTitleInput').value = localStorage.getItem('fz_greeting_title') || 'Welcome LiveTV FZ';
+document.getElementById('greetingPoweredInput').value = localStorage.getItem('fz_greeting_powered') || "powered by Zubi Facts Creation's";
+}
+
+function saveGreeting() {
+const title = document.getElementById('greetingTitleInput').value.trim() || 'Welcome LiveTV FZ';
+const powered = document.getElementById('greetingPoweredInput').value.trim() || "powered by Zubi Facts Creation's";
+localStorage.setItem('fz_greeting_title', title);
+localStorage.setItem('fz_greeting_powered', powered);
+alert('Greeting message updated successfully!');
+document.getElementById('greetingFormContainer').classList.add('hidden');
+}
+
+function loadAds() {
+document.getElementById('admobInput').value = localStorage.getItem('fz_admob_id') || '';
+document.getElementById('adsenseInput').value = localStorage.getItem('fz_adsense_id') || '';
+}
+
+function saveAdMob() {
+localStorage.setItem('fz_admob_id', document.getElementById('admobInput').value.trim());
+alert('AdMob ID saved successfully!');
+document.getElementById('adMobFormContainer').classList.add('hidden');
+}
+
+function saveAdSense() {
+localStorage.setItem('fz_adsense_id', document.getElementById('adsenseInput').value.trim());
+alert('AdSense ID saved successfully!');
+document.getElementById('adSenseFormContainer').classList.add('hidden');
+}
+
+// --- Affiliate Links Manager ---
+function getAffiliateLinks() {
+try { return JSON.parse(localStorage.getItem('fz_affiliate_links')) || []; } catch(e) { return []; }
+}
+
+function closeAffiliateForm() {
+document.getElementById('affiliateFormContainer').classList.add('hidden');
+}
+
+function saveAffiliateLink() {
+const title = document.getElementById('affiliateTitle').value.trim();
+const url = document.getElementById('affiliateUrl').value.trim();
+const editIndex = parseInt(document.getElementById('editAffiliateIndex').value);
+if(!title || !url) { alert('Title and URL are required!'); return; }
+let links = getAffiliateLinks();
+const newLink = { title, url };
+if(editIndex === -1) { links.push(newLink); } else { links[editIndex] = newLink; }
+localStorage.setItem('fz_affiliate_links', JSON.stringify(links));
+loadAffiliateLinks();
+closeAffiliateForm();
+
+document.getElementById('affiliateTitle').value = '';
+document.getElementById('affiliateUrl').value = '';
+document.getElementById('editAffiliateIndex').value = '-1';
+
+alert('Affiliate link saved successfully!');
+}
+
+function loadAffiliateLinks() {
+const links = getAffiliateLinks();
+const wrapper = document.getElementById('affiliateTableWrapper');
+if(links.length === 0) { wrapper.innerHTML = <div class="empty-notice"&gt;No affiliate links added yet.&lt;/div>; return; }
+let html = <table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th style="width:45%;"&gt;Name&lt;/th&gt;&lt;th style="width:30%;"&gt;Type&lt;/th&gt;&lt;th style="width:25%;"&gt;Actions&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody>;
+links.forEach((l, index) => {
+html += <tr&gt;&lt;td&gt;&lt;b&gt;${l.title}</b></td><td>Affiliate</td><td class="actions-cell"><button class="action-sm edit-btn" onclick="editAffiliate(${index})"&gt;Edit&lt;/button&gt;&lt;button class="action-sm del-btn" onclick="deleteAffiliate(${index})">Del</button></td></tr>; }); html +=</tbody></table>`;
+wrapper.innerHTML = html;
+}
+
+function editAffiliate(index) {
+const links = getAffiliateLinks();
+const l = links[index];
+document.getElementById('editAffiliateIndex').value = index;
+document.getElementById('affiliateTitle').value = l.title;
+document.getElementById('affiliateUrl').value = l.url;
+document.getElementById('affiliateFormContainer').classList.remove('hidden');
+}
+
+function deleteAffiliate(index) {
+if(confirm('Delete this affiliate link?')) {
+let links = getAffiliateLinks();
+links.splice(index, 1);
+localStorage.setItem('fz_affiliate_links', JSON.stringify(links));
+loadAffiliateLinks();
+}
+}
+
+// --- Social Links ---
+function getSocialLinks() {
+try { return JSON.parse(localStorage.getItem('fz_social_links')) || []; } catch(e) { return []; }
+}
+
+function closeSocialForm() {
+document.getElementById('socialFormContainer').classList.add('hidden');
+}
+
+function saveSocialLink() {
+const platform = document.getElementById('socialPlatform').value;
+const url = document.getElementById('socialUrl').value.trim();
+const editIndex = parseInt(document.getElementById('editSocialIndex').value);
+if(!url) { alert('URL is required!'); return; }
+let links = getSocialLinks();
+const newLink = { platform, url };
+if(editIndex === -1) { links.push(newLink); } else { links[editIndex] = newLink; }
+localStorage.setItem('fz_social_links', JSON.stringify(links));
+loadSocialLinks();
+closeSocialForm();
+
+document.getElementById('socialUrl').value = '';
+document.getElementById('editSocialIndex').value = '-1';
+
+alert('Social link saved successfully!');
+}
+
+function loadSocialLinks() {
+const links = getSocialLinks();
+const wrapper = document.getElementById('socialTableWrapper');
+if(links.length === 0) { wrapper.innerHTML = <div class="empty-notice"&gt;No social links added yet.&lt;/div>; return; }
+let html = <table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th style="width:45%;"&gt;Name&lt;/th&gt;&lt;th style="width:30%;"&gt;Type&lt;/th&gt;&lt;th style="width:25%;"&gt;Actions&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody>;
+links.forEach((l, index) => {
+html += <tr&gt;&lt;td&gt;&lt;b&gt;${l.platform.toUpperCase()}</b></td><td>Social</td><td class="actions-cell"><button class="action-sm edit-btn" onclick="editSocial({index})">Del</button></td></tr>; }); html +=</tbody></table>`;
+wrapper.innerHTML = html;
+}
+
+function editSocial(index) {
+const links = getSocialLinks();
+const l = links[index];
+document.getElementById('editSocialIndex').value = index;
+document.getElementById('socialPlatform').value = l.platform;
+document.getElementById('socialUrl').value = l.url;
+document.getElementById('socialFormContainer').classList.remove('hidden');
+}
+
+function deleteSocial(index) {
+if(confirm('Delete this social link?')) {
+let links = getSocialLinks();
+links.splice(index, 1);
+localStorage.setItem('fz_social_links', JSON.stringify(links));
+loadSocialLinks();
+}
+}
+
+function saveCredentials() {
+const u = document.getElementById('newAdminUser').value.trim();
+const p = document.getElementById('newAdminPass').value.trim();
+if(!u || !p) { alert('Fill both fields!'); return; }
+localStorage.setItem('fz_admin_user', u);
+localStorage.setItem('fz_admin_pass', p);
+alert('Credentials updated!');
+document.getElementById('securityFormContainer').classList.add('hidden');
+}
+
+function loadTicker() {
+document.getElementById('tickerInput').value = localStorage.getItem('fz_ticker_text') || '';
+}
+
+function saveTicker() {
+localStorage.setItem('fz_ticker_text', document.getElementById('tickerInput').value.trim());
+alert('Ticker updated!');
+document.getElementById('tickerFormContainer').classList.add('hidden');
+}
+
+// --- Custom Streams Manager ---
+function getCustomStreams() {
+try { return JSON.parse(localStorage.getItem('fz_custom_streams')) || []; } catch(e) { return []; }
+}
+
+function closeStreamForm() {
+document.getElementById('streamFormContainer').classList.add('hidden');
+}
+
+function saveStream() {
+const name = document.getElementById('streamName').value.trim();
+const url = document.getElementById('streamUrl').value.trim();
+const category = document.getElementById('streamCategory').value;
+const country = document.getElementById('streamCountry').value.trim() || 'global';
+const featured = document.getElementById('streamFeatured').checked;
+const editIndex = parseInt(document.getElementById('editIndex').value);
+
+if(!name || !url) { alert('Name and URL required!'); return; }
+
+const logoUrlInput = document.getElementById('streamLogo').value.trim();
+const logoFileInput = document.getElementById('streamLogoFile');
+
+if (logoFileInput.files && logoFileInput.files[0]) {
+const reader = new FileReader();
+reader.onload = function(e) {
+finishSaveStream(name, url, e.target.result, category, country, featured, editIndex);
+};
+reader.readAsDataURL(logoFileInput.files[0]);
+} else {
+finishSaveStream(name, url, logoUrlInput, category, country, featured, editIndex);
+}
+}
+
+function finishSaveStream(name, url, logo, category, country, featured, editIndex) {
+let streams = getCustomStreams();
+const newStream = { name, url, logo, category, country, featured };
+if(editIndex === -1) { streams.push(newStream); } else { streams[editIndex] = newStream; }
+localStorage.setItem('fz_custom_streams', JSON.stringify(streams));
+loadStreams();
+closeStreamForm();
+
+document.getElementById('streamName').value = '';
+document.getElementById('streamUrl').value = '';
+document.getElementById('streamLogo').value = '';
+document.getElementById('streamLogoFile').value = '';
+document.getElementById('streamCountry').value = '';
+document.getElementById('streamFeatured').checked = false;
+document.getElementById('editIndex').value = '-1';
+
+alert('Stream configuration saved successfully!');
+}
+
+function loadStreams() {
+const streams = getCustomStreams();
+const wrapper = document.getElementById('streamsTableWrapper');
+if(streams.length === 0) { wrapper.innerHTML = <div class="empty-notice"&gt;No streams configured.&lt;/div>; return; }
+let html = <table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th style="width:40%;"&gt;Name&lt;/th&gt;&lt;th style="width:35%;"&gt;Category&lt;/th&gt;&lt;th style="width:25%;"&gt;Actions&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody>;
+streams.forEach((s, index) => {
+html += <tr&gt;&lt;td&gt;&lt;b&gt;${s.name}</b></td><td>${s.category}&lt;/td&gt;&lt;td class="actions-cell"&gt;&lt;button class="action-sm edit-btn" onclick="editStream(${index})">Edit</button><button class="action-sm del-btn" onclick="deleteStream(${index})"&gt;Del&lt;/button&gt;&lt;/td&gt;&lt;/tr>;
+});
+html += </tbody&gt;&lt;/table>;
+wrapper.innerHTML = html;
+}
+
+function editStream(index) {
+const streams = getCustomStreams();
+const s = streams[index];
+document.getElementById('editIndex').value = index;
+document.getElementById('streamName').value = s.name;
+document.getElementById('streamUrl').value = s.url;
+document.getElementById('streamLogo').value = s.logo && !s.logo.startsWith('data:') ? s.logo : '';
+document.getElementById('streamLogoFile').value = '';
+document.getElementById('streamCategory').value = s.category;
+document.getElementById('streamCountry').value = s.country;
+document.getElementById('streamFeatured').checked = !!s.featured;
+document.getElementById('streamFormContainer').classList.remove('hidden');
+}
+
+function deleteStream(index) {
+if(confirm('Delete stream?')) {
+let streams = getCustomStreams();
+streams.splice(index, 1);
+localStorage.setItem('fz_custom_streams', JSON.stringify(streams));
+loadStreams();
+}
+}
+</script>
+</body>
+</html>
