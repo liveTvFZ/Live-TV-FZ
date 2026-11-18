@@ -6,16 +6,17 @@
     <title>Live TV FZ - Official Control Center</title>
     <style>
         :root {
-            --bg-body: #ebf0f5;
-            --panel-bg: #ebf0f5;
-            --text-main: #2d3748;
-            --text-muted: #718096;
-            --accent: #00b4d8;
-            --accent-hover: #0096c7;
+            --bg-body: #020806;
+            --panel-bg: rgba(10, 30, 24, 0.75);
+            --border-color: rgba(0, 255, 128, 0.4);
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --accent: #00ff88;
+            --accent-hover: #00cc6a;
             --danger: #ef4444;
             --warning: #f59e0b;
-            --shadow-light: #ffffff;
-            --shadow-dark: #c5d1e0;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(0, 255, 136, 0.2);
+            --glass-blur: blur(20px);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
@@ -23,35 +24,37 @@
         body { 
             background-color: var(--bg-body); color: var(--text-main); 
             min-height: 100vh; padding: 20px 15px; 
-        }
-
-        .top-tiranga-strip { 
-            height: 4px; width: 100%; 
-            background: linear-gradient(90deg, #FF9933 33.33%, #ffffff 33.33%, #ffffff 66.66%, #138808 66.66%); 
-            margin-bottom: 25px; border-radius: 4px; 
+            overflow-y: auto; overflow-x: hidden;
+            background: radial-gradient(circle at 10% 20%, rgba(0, 255, 136, 0.3) 0%, transparent 45%),
+                        radial-gradient(circle at 90% 85%, rgba(0, 180, 120, 0.25) 0%, transparent 45%),
+                        linear-gradient(135deg, #010c08 0%, #041f18 50%, #020806 100%);
         }
 
         .container { width: 100%; max-width: 600px; margin: 0 auto; }
 
         .neumorph-card-login {
             background: var(--panel-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-color);
             border-radius: 25px;
             padding: 35px 25px;
-            box-shadow: 12px 12px 25px var(--shadow-dark), -12px -12px 25px var(--shadow-light);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.7), 0 0 35px rgba(0,255,136,0.35);
             text-align: center;
             max-width: 420px;
             margin: 60px auto;
         }
 
         .avatar-circle {
-            width: 70px; height: 70px; background: var(--panel-bg);
+            width: 70px; height: 70px; background: rgba(0, 255, 136, 0.1);
+            border: 1.5px solid var(--border-color);
             border-radius: 50%; margin: 0 auto 15px auto;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            box-shadow: 0 0 15px rgba(0,255,136,0.3);
             font-size: 26px; color: var(--accent);
         }
 
-        .neumorph-card-login h2 { font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 5px; }
+        .neumorph-card-login h2 { font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 5px; text-shadow: 0 0 10px rgba(0,255,136,0.5); }
         .neumorph-card-login p { font-size: 12px; color: var(--text-muted); margin-bottom: 25px; }
 
         .neumorph-input-group {
@@ -59,19 +62,19 @@
         }
 
         .neumorph-input {
-            width: 100%; background: var(--panel-bg); border: none;
+            width: 100%; background: rgba(0, 0, 0, 0.35); border: 1.5px solid var(--border-color);
             padding: 14px 18px 14px 45px; border-radius: 30px;
             font-size: 14px; color: var(--text-main); outline: none;
-            box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
         }
 
-        .input-icon { position: absolute; left: 16px; top: 15px; font-size: 16px; color: var(--text-muted); }
+        .input-icon { position: absolute; left: 16px; top: 15px; font-size: 16px; color: var(--accent); }
 
         .neumorph-btn {
-            width: 100%; background: var(--accent); border: none;
-            padding: 14px; border-radius: 30px; color: #fff; font-size: 15px;
+            width: 100%; background: linear-gradient(135deg, #00ff88, #00b4d8); border: none;
+            padding: 14px; border-radius: 30px; color: #000; font-size: 15px;
             font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
-            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            box-shadow: 0 4px 15px rgba(0,255,136,0.5);
             margin-top: 10px;
         }
 
@@ -79,43 +82,48 @@
 
         .dash-header { 
             display: flex; justify-content: space-between; align-items: center; 
-            margin-bottom: 25px; background: var(--panel-bg); padding: 18px 22px; 
-            border-radius: 20px; 
-            box-shadow: 8px 8px 18px var(--shadow-dark), -8px -8px 18px var(--shadow-light);
+            margin-bottom: 25px; background: var(--panel-bg); 
+            backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            padding: 18px 22px; border-radius: 20px; border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
         }
         
         .dash-card {
-            background: var(--panel-bg); border-radius: 20px;
+            background: var(--panel-bg); 
+            backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
             padding: 22px; margin-bottom: 20px; color: var(--text-main);
-            box-shadow: 8px 8px 18px var(--shadow-dark), -8px -8px 18px var(--shadow-light);
+            box-shadow: var(--card-shadow);
         }
 
-        .dash-card h3 { font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; margin-bottom: 0; }
+        .dash-card h3 { font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; margin-bottom: 0; text-shadow: 0 0 8px rgba(0,255,136,0.3); }
         
         .form-group { margin-bottom: 14px; text-align: left; }
         label { display: block; font-size: 10px; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
         
         input, select { 
-            width: 100%; background: var(--panel-bg); border: none; 
+            width: 100%; background: rgba(0, 0, 0, 0.35); border: 1.5px solid var(--border-color); 
             padding: 12px 16px; border-radius: 25px; color: var(--text-main); font-size: 13px; outline: none; 
-            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
         }
+        input::placeholder { color: #64748b; }
 
         .btn { 
-            background: var(--accent); color: #fff; border: none; padding: 9px 16px; 
+            background: var(--accent); color: #000; border: none; padding: 9px 16px; 
             border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; 
             display: inline-flex; align-items: center; gap: 6px; text-decoration: none; 
-            box-shadow: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
+            box-shadow: 0 4px 12px rgba(0,255,136,0.4);
         }
-        .btn-secondary { background: #e2e8f0; color: var(--text-main); }
-        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: var(--text-main); border: 1px solid var(--border-color); }
+        .btn-danger { background: var(--danger); color: #fff; box-shadow: 0 4px 12px rgba(255,82,82,0.4); }
 
         .hidden { display: none !important; }
 
         /* Perfect Compact Table Styles */
-        .table-container { width: 100%; overflow: hidden; margin-top: 15px; }
+        .table-container { width: 100%; overflow-x: auto; margin-top: 15px; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th, td { padding: 10px 6px; text-align: left; border-bottom: 1px solid var(--shadow-dark); font-size: 11px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        th, td { padding: 10px 6px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 11px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         th { color: var(--text-muted); font-size: 9px; text-transform: uppercase; }
         
         .actions-cell { display: flex; gap: 4px; align-items: center; }
@@ -128,18 +136,11 @@
 <body>
 
     <div class="container">
-        <div class="top-tiranga-strip"></div>
-        
-        <!-- Login Section -->
+        <!-- Login Section (Username column completely removed, only password remains) -->
         <div id="loginWrapper" class="neumorph-card-login">
             <div class="avatar-circle">📺</div>
             <h2>Admin Login</h2>
             <p>Live TV FZ Secure Control Center</p>
-            
-            <div class="neumorph-input-group">
-                <span class="input-icon">👤</span>
-                <input type="text" id="adminUser" class="neumorph-input" placeholder="Username">
-            </div>
             
             <div class="neumorph-input-group">
                 <span class="input-icon">🔒</span>
@@ -166,7 +167,7 @@
                     <h3>👋 Greeting Popup Manager</h3>
                     <button class="btn btn-secondary" onclick="toggleSection('greetingFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
                 </div>
-                <div id="greetingFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--shadow-dark); padding-top:15px;">
+                <div id="greetingFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
                     <div class="form-group">
                         <label>Main Title</label>
                         <input type="text" id="greetingTitleInput" placeholder="Welcome LiveTV FZ">
@@ -185,7 +186,7 @@
                     <h3>💰 Google AdMob Banner Manager</h3>
                     <button class="btn btn-secondary" onclick="toggleSection('adMobFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
                 </div>
-                <div id="adMobFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--shadow-dark); padding-top:15px;">
+                <div id="adMobFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
                     <div class="form-group">
                         <label>AdMob Banner Unit ID</label>
                         <input type="text" id="admobInput" placeholder="ca-app-pub-xxxxxxxx/xxxxxxxx">
@@ -200,7 +201,7 @@
                     <h3>🎯 Google AdSense Manager</h3>
                     <button class="btn btn-secondary" onclick="toggleSection('adSenseFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
                 </div>
-                <div id="adSenseFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--shadow-dark); padding-top:15px;">
+                <div id="adSenseFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
                     <div class="form-group">
                         <label>AdSense Slot / Client ID</label>
                         <input type="text" id="adsenseInput" placeholder="ca-pub-xxxxxxxxxxxxxxxx">
@@ -215,7 +216,7 @@
                     <h3>🤝 Affiliate Links Manager</h3>
                     <button class="btn btn-secondary" onclick="toggleSection('affiliateFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
                 </div>
-                <div id="affiliateFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--shadow-dark); padding-top:15px;">
+                <div id="affiliateFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
                     <input type="hidden" id="editAffiliateIndex" value="-1">
                     <div class="form-group">
                         <label>Affiliate / Promotion Title</label>
@@ -239,7 +240,7 @@
                     <h3>📢 Running Ticker Message</h3>
                     <button class="btn btn-secondary" onclick="toggleSection('tickerFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
                 </div>
-                <div id="tickerFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--shadow-dark); padding-top:15px;">
+                <div id="tickerFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
                     <div class="form-group">
                         <label>Ticker Announcement Text</label>
                         <input type="text" id="tickerInput" placeholder="Enter ticker message...">
@@ -254,7 +255,7 @@
                     <h3>🌐 Social & Facebook Links Manager</h3>
                     <button class="btn btn-secondary" onclick="toggleSection('socialFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
                 </div>
-                <div id="socialFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--shadow-dark); padding-top:15px;">
+                <div id="socialFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
                     <input type="hidden" id="editSocialIndex" value="-1">
                     <div class="form-group">
                         <label>Platform Type</label>
@@ -282,7 +283,7 @@
                     <h3>📺 Custom Streams & Pinned Channels</h3>
                     <button class="btn btn-secondary" onclick="toggleSection('streamFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
                 </div>
-                <div id="streamFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--shadow-dark); padding-top:15px;">
+                <div id="streamFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
                     <input type="hidden" id="editIndex" value="-1">
                     <div class="form-group">
                         <label>Channel / Stream Title</label>
@@ -298,7 +299,7 @@
                     </div>
                     <div class="form-group">
                         <label>Custom Logo (Option 2: Browse Image JPG/PNG)</label>
-                        <input type="file" id="streamLogoFile" accept="image/png, image/jpeg, image/jpg" style="padding:8px; box-shadow:none; background:#fff; border-radius:15px;">
+                        <input type="file" id="streamLogoFile" accept="image/png, image/jpeg, image/jpg" style="padding:8px; box-shadow:none; background:rgba(0,0,0,0.3); border-radius:15px;">
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                         <div class="form-group">
@@ -330,27 +331,21 @@
                 <div class="table-container" id="streamsTableWrapper"></div>
             </div>
 
-            <!-- Security Credentials -->
-            <div class="dash-card" style="border: 1px solid rgba(239, 68, 68, 0.3);">
+            <!-- Security Credentials (Password Change Option Restored) -->
+            <div class="dash-card" style="border: 1px solid rgba(255, 82, 82, 0.4);">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
                         <h3 style="color:var(--danger);">🔐 Security Credentials</h3>
-                        <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Manage admin username & password</div>
+                        <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Manage admin password</div>
                     </div>
-                    <button class="btn btn-secondary" onclick="toggleSection('securityFormContainer', this)" style="font-size:10px; padding:6px 12px;">Modify Security</button>
+                    <button class="btn btn-secondary" onclick="toggleSection('securityFormContainer', this)" style="font-size:10px; padding:6px 12px;">Modify Password</button>
                 </div>
-                <div id="securityFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--shadow-dark); padding-top:15px;">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <div class="form-group">
-                            <label>New Username</label>
-                            <input type="text" id="newAdminUser" placeholder="Username">
-                        </div>
-                        <div class="form-group">
-                            <label>New Password</label>
-                            <input type="password" id="newAdminPass" placeholder="Password">
-                        </div>
+                <div id="securityFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" id="newAdminPass" placeholder="Enter new password">
                     </div>
-                    <button class="btn" onclick="saveCredentials()">Update Credentials</button>
+                    <button class="btn" onclick="saveCredentials()">Update Password</button>
                 </div>
             </div>
         </div>
@@ -364,16 +359,14 @@
         });
 
         function loginAdmin() {
-            const user = document.getElementById('adminUser').value.trim();
             const pass = document.getElementById('adminPass').value.trim();
-            const savedUser = localStorage.getItem('fz_admin_user') || 'admin';
             const savedPass = localStorage.getItem('fz_admin_pass') || 'admin@2876';
 
-            if(user === savedUser && pass === savedPass) {
+            if(pass === savedPass) {
                 localStorage.setItem('fz_admin_logged', 'true');
                 showDashboard();
             } else {
-                document.getElementById('loginError').innerText = 'Invalid Username or Password';
+                document.getElementById('loginError').innerText = 'Invalid Password';
             }
         }
 
@@ -381,7 +374,6 @@
             localStorage.removeItem('fz_admin_logged');
             document.getElementById('adminDashboard').style.display = 'none';
             document.getElementById('loginWrapper').style.display = 'block';
-            document.getElementById('adminUser').value = '';
             document.getElementById('adminPass').value = '';
         }
 
@@ -554,13 +546,12 @@
         }
 
         function saveCredentials() {
-            const u = document.getElementById('newAdminUser').value.trim();
             const p = document.getElementById('newAdminPass').value.trim();
-            if(!u || !p) { alert('Fill both fields!'); return; }
-            localStorage.setItem('fz_admin_user', u);
+            if(!p) { alert('Enter new password!'); return; }
             localStorage.setItem('fz_admin_pass', p);
-            alert('Credentials updated!');
+            alert('Password updated successfully!');
             document.getElementById('securityFormContainer').classList.add('hidden');
+            document.getElementById('newAdminPass').value = '';
         }
 
         function loadTicker() {
