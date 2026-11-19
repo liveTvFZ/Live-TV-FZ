@@ -180,6 +180,60 @@
                 </div>
             </div>
 
+            <!-- YouTube Full Channel & Playlist Manager -->
+            <div class="dash-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>▶️ YouTube Full Channel & Playlist Manager</h3>
+                    <button class="btn btn-secondary" onclick="toggleSection('ytChannelFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+                </div>
+                <div id="ytChannelFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
+                    <input type="hidden" id="editYtIndex" value="-1">
+                    <div class="form-group">
+                        <label>Channel / Playlist Display Name</label>
+                        <input type="text" id="ytChName" placeholder="e.g. ARY Digital">
+                    </div>
+                    <div class="form-group">
+                        <label>Channel ID (UC...), Playlist ID (PL...), or @Handle URL</label>
+                        <input type="text" id="ytChTarget" placeholder="UCoNb-hzlrW7Lx05ZvCz2JaA or @arydigitalasia or PL...">
+                    </div>
+                    <div class="form-group">
+                        <label>Custom Logo (Option 1: Image URL)</label>
+                        <input type="text" id="ytChLogo" placeholder="https://.../logo.png">
+                    </div>
+                    <div class="form-group">
+                        <label>Custom Logo (Option 2: Browse Image JPG/PNG)</label>
+                        <input type="file" id="ytChLogoFile" accept="image/png, image/jpeg, image/jpg" style="padding:8px; box-shadow:none; background:rgba(0,0,0,0.3); border-radius:15px;">
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="ytChCategory">
+                                <option value="social">YouTube & Social</option>
+                                <option value="entertainment">Entertainment</option>
+                                <option value="news">News</option>
+                                <option value="sports">Sports</option>
+                                <option value="movies">Movies</option>
+                                <option value="music">Music</option>
+                                <option value="kids">Kids</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Country Code</label>
+                            <input type="text" id="ytChCountry" placeholder="pk, in, social">
+                        </div>
+                    </div>
+                    <div class="form-group" style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                        <input type="checkbox" id="ytChFeatured" style="width:16px; height:16px; accent-color:var(--accent);">
+                        <label for="ytChFeatured" style="margin:0; color:var(--text-main); cursor:pointer; text-transform:none; font-size:11px;">⭐ Pin / Feature on absolute top</label>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <button class="btn" onclick="saveYtChannel()">Save YouTube Channel</button>
+                        <button class="btn btn-secondary" onclick="closeYtChannelForm()">Cancel</button>
+                    </div>
+                </div>
+                <div class="table-container" id="ytChannelsTableWrapper"></div>
+            </div>
+
             <!-- AdMob Manager -->
             <div class="dash-card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -246,6 +300,59 @@
                         <input type="text" id="tickerInput" placeholder="Enter ticker message...">
                     </div>
                     <button class="btn" onclick="saveTicker()">Publish Ticker</button>
+                </div>
+            </div>
+
+            <!-- Announcement / Special Notice Manager -->
+            <div class="dash-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>🔔 Announcement / Special Notice</h3>
+                    <button class="btn btn-secondary" onclick="toggleSection('announcementFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+                </div>
+                <div id="announcementFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
+                    <div class="form-group">
+                        <label>Special Announcement / Notice Text (Leave blank to hide)</label>
+                        <input type="text" id="announcementInput" placeholder="e.g. New episodes & channels live now!">
+                    </div>
+                    <button class="btn" onclick="saveAnnouncement()">Save Announcement</button>
+                </div>
+            </div>
+
+            <!-- Quick App Controls (Welcome Popup Switch & YT Cache Reset) -->
+            <div class="dash-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>⚙️ Quick App Controls</h3>
+                    <button class="btn btn-secondary" onclick="toggleSection('quickControlsContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+                </div>
+                <div id="quickControlsContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
+                    <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                        <div>
+                            <div style="font-size:12px; font-weight:700; color:var(--text-main);">Welcome Popup On / Off</div>
+                            <div style="font-size:10px; color:var(--text-muted);">Show or disable opening banner popup</div>
+                        </div>
+                        <input type="checkbox" id="welcomePopupEnabledToggle" style="width:18px; height:18px; accent-color:var(--accent);" onchange="toggleWelcomePopupEnabled(this.checked)">
+                    </div>
+                    <hr style="border:none; border-top:1px solid var(--border-color); margin:12px 0;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                        <div>
+                            <div style="font-size:12px; font-weight:700; color:var(--text-main);">Refresh YouTube Video Cache</div>
+                            <div style="font-size:10px; color:var(--text-muted);">Clear 30-min cached lists to fetch latest videos now</div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="clearYtCacheNow()" style="padding:6px 12px; font-size:11px;">🔄 Clear Cache</button>
+                    </div>
+                    <hr style="border:none; border-top:1px solid var(--border-color); margin:12px 0;">
+                    <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;">
+                        <div>
+                            <div style="font-size:12px; font-weight:700; color:#ff6b6b;">🛠️ Maintenance Mode On / Off</div>
+                            <div style="font-size:10px; color:var(--text-muted);">Show maintenance screen on Live TV FZ app</div>
+                        </div>
+                        <input type="checkbox" id="maintenanceModeToggle" style="width:18px; height:18px; accent-color:var(--accent);" onchange="toggleMaintenanceMode(this.checked)">
+                    </div>
+                    <div class="form-group" style="margin-bottom:8px;">
+                        <label>Maintenance Message (Optional)</label>
+                        <input type="text" id="maintenanceMsgInput" placeholder="App is under scheduled maintenance. Please check back shortly.">
+                    </div>
+                    <button class="btn btn-secondary" onclick="saveMaintenanceMessage()" style="padding:6px 12px; font-size:11px;">Save Maintenance Note</button>
                 </div>
             </div>
 
@@ -352,60 +459,6 @@
                 </div>
             </div>
 
-            <!-- YouTube Full Channel & Playlist Manager -->
-            <div class="dash-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3>▶️ YouTube Full Channel & Playlist Manager</h3>
-                    <button class="btn btn-secondary" onclick="toggleSection('ytChannelFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
-                </div>
-                <div id="ytChannelFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
-                    <input type="hidden" id="editYtIndex" value="-1">
-                    <div class="form-group">
-                        <label>Channel / Playlist Display Name</label>
-                        <input type="text" id="ytChName" placeholder="e.g. ARY Digital">
-                    </div>
-                    <div class="form-group">
-                        <label>Channel ID (UC...), Playlist ID (PL...), or @Handle URL</label>
-                        <input type="text" id="ytChTarget" placeholder="UCoNb-hzlrW7Lx05ZvCz2JaA or @arydigitalasia or PL...">
-                    </div>
-                    <div class="form-group">
-                        <label>Custom Logo (Option 1: Image URL)</label>
-                        <input type="text" id="ytChLogo" placeholder="https://.../logo.png">
-                    </div>
-                    <div class="form-group">
-                        <label>Custom Logo (Option 2: Browse Image JPG/PNG)</label>
-                        <input type="file" id="ytChLogoFile" accept="image/png, image/jpeg, image/jpg" style="padding:8px; box-shadow:none; background:rgba(0,0,0,0.3); border-radius:15px;">
-                    </div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <div class="form-group">
-                            <label>Category</label>
-                            <select id="ytChCategory">
-                                <option value="social">YouTube & Social</option>
-                                <option value="entertainment">Entertainment</option>
-                                <option value="news">News</option>
-                                <option value="sports">Sports</option>
-                                <option value="movies">Movies</option>
-                                <option value="music">Music</option>
-                                <option value="kids">Kids</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Country Code</label>
-                            <input type="text" id="ytChCountry" placeholder="pk, in, social">
-                        </div>
-                    </div>
-                    <div class="form-group" style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                        <input type="checkbox" id="ytChFeatured" style="width:16px; height:16px; accent-color:var(--accent);">
-                        <label for="ytChFeatured" style="margin:0; color:var(--text-main); cursor:pointer; text-transform:none; font-size:11px;">⭐ Pin / Feature on absolute top</label>
-                    </div>
-                    <div style="display:flex; gap:8px; margin-top:10px;">
-                        <button class="btn" onclick="saveYtChannel()">Save YouTube Channel</button>
-                        <button class="btn btn-secondary" onclick="closeYtChannelForm()">Cancel</button>
-                    </div>
-                </div>
-                <div class="table-container" id="ytChannelsTableWrapper"></div>
-            </div>
-
             <!-- Security Credentials (Password Change Option Restored) -->
             <div class="dash-card" style="border: 1px solid rgba(255, 82, 82, 0.4);">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -455,9 +508,24 @@
         function showDashboard() {
             document.getElementById('loginWrapper').style.display = 'none';
             document.getElementById('adminDashboard').style.display = 'block';
+            if (!localStorage.getItem('fz_yt_channels_seeded_v1')) {
+                let existing = getYtChannels();
+                if (existing.length === 0) {
+                    localStorage.setItem('fz_yt_channels', JSON.stringify([{
+                        name: 'ZubiFacts Creations',
+                        target: '@zubifactscreations',
+                        logo: '',
+                        category: 'social',
+                        country: 'om',
+                        featured: true
+                    }]));
+                }
+                localStorage.setItem('fz_yt_channels_seeded_v1', 'true');
+            }
             loadAds();
             loadGreeting();
             loadTicker();
+            loadAnnouncement();
             loadAffiliateLinks();
             loadSocialLinks();
             loadStreams();
@@ -476,16 +544,16 @@
         }
 
         function loadGreeting() {
-            document.getElementById('greetingTitleInput').value = localStorage.getItem('fz_greeting_title') || 'Welcome LiveTV FZ';
-            document.getElementById('greetingPoweredInput').value = localStorage.getItem('fz_greeting_powered') || "powered by Zubi Facts Creation's";
+            document.getElementById('greetingTitleInput').value = localStorage.getItem('fz_greeting_title') || '';
+            document.getElementById('greetingPoweredInput').value = localStorage.getItem('fz_greeting_powered') || '';
         }
 
         function saveGreeting() {
-            const title = document.getElementById('greetingTitleInput').value.trim() || 'Welcome LiveTV FZ';
-            const powered = document.getElementById('greetingPoweredInput').value.trim() || "powered by Zubi Facts Creation's";
+            const title = document.getElementById('greetingTitleInput').value.trim();
+            const powered = document.getElementById('greetingPoweredInput').value.trim();
             localStorage.setItem('fz_greeting_title', title);
             localStorage.setItem('fz_greeting_powered', powered);
-            alert('Greeting message updated successfully!');
+            alert(title || powered ? 'Greeting message updated successfully!' : 'Greeting cleared! Only banner will show.');
             document.getElementById('greetingFormContainer').classList.add('hidden');
         }
 
@@ -638,6 +706,51 @@
             localStorage.setItem('fz_ticker_text', document.getElementById('tickerInput').value.trim());
             alert('Ticker updated!');
             document.getElementById('tickerFormContainer').classList.add('hidden');
+        }
+
+        function loadAnnouncement() {
+            const el = document.getElementById('announcementInput');
+            if (el) el.value = localStorage.getItem('fz_announcement_text') || '';
+            const popToggle = document.getElementById('welcomePopupEnabledToggle');
+            if (popToggle) popToggle.checked = (localStorage.getItem('fz_welcome_enabled') !== 'false');
+            const mToggle = document.getElementById('maintenanceModeToggle');
+            if (mToggle) mToggle.checked = (localStorage.getItem('fz_maintenance') === 'true');
+            const mMsg = document.getElementById('maintenanceMsgInput');
+            if (mMsg) mMsg.value = localStorage.getItem('fz_maintenance_msg') || '';
+        }
+
+        function toggleMaintenanceMode(isMaintOn) {
+            localStorage.setItem('fz_maintenance', isMaintOn ? 'true' : 'false');
+            alert(isMaintOn ? 'Maintenance Mode ON! App will show maintenance screen.' : 'Maintenance Mode OFF! App is live normally.');
+        }
+
+        function saveMaintenanceMessage() {
+            const msg = document.getElementById('maintenanceMsgInput').value.trim();
+            localStorage.setItem('fz_maintenance_msg', msg);
+            alert('Maintenance message saved!');
+        }
+
+        function saveAnnouncement() {
+            const val = document.getElementById('announcementInput').value.trim();
+            localStorage.setItem('fz_announcement_text', val);
+            alert(val ? 'Announcement saved!' : 'Announcement cleared!');
+            document.getElementById('announcementFormContainer').classList.add('hidden');
+        }
+
+        function toggleWelcomePopupEnabled(isEnabled) {
+            localStorage.setItem('fz_welcome_enabled', isEnabled ? 'true' : 'false');
+        }
+
+        function clearYtCacheNow() {
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (k && (k.startsWith('fz_yt_cache_') || k.startsWith('fz_yt_handle_'))) {
+                    keysToRemove.push(k);
+                }
+            }
+            keysToRemove.forEach(k => localStorage.removeItem(k));
+            alert('YouTube cache cleared! Latest videos will load immediately.');
         }
 
         // --- Custom Streams Manager ---
@@ -829,7 +942,7 @@
             const list = getYtChannels();
             const wrapper = document.getElementById('ytChannelsTableWrapper');
             if(list.length === 0) {
-                wrapper.innerHTML = `<div class="empty-notice">Default channel (ARY Digital) is active. Add more channels or playlists above.</div>`;
+                wrapper.innerHTML = `<div class="empty-notice">No manual YouTube channels/playlists added yet. Click "+ Open Trigger" to add.</div>`;
                 return;
             }
             let html = `<table><thead><tr><th style="width:40%;">Name</th><th style="width:35%;">ID / Handle</th><th style="width:25%;">Actions</th></tr></thead><tbody>`;
