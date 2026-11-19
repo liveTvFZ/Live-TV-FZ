@@ -260,6 +260,52 @@
             border-radius: 20px; font-size: 11px; font-weight: 800; border: none; cursor: pointer; 
             box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4); 
         }
+        .play-btn.yt-ch-btn {
+            background: linear-gradient(135deg, #ff3b30, #ff6b6b); color: #fff;
+            box-shadow: 0 4px 15px rgba(255, 59, 48, 0.4);
+        }
+
+        /* YOUTUBE FULL CHANNEL VIDEOS VIEW */
+        .yt-channel-topbar {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            margin-bottom: 16px; padding: 12px 16px; border-radius: 18px;
+            background: var(--panel-bg); border: 1px solid var(--border-color);
+            backdrop-filter: var(--glass-blur); box-shadow: var(--card-shadow);
+        }
+        .yt-back-btn {
+            background: rgba(0, 255, 136, 0.15); border: 1px solid var(--border-color);
+            color: var(--accent); padding: 7px 14px; border-radius: 14px;
+            font-size: 12px; font-weight: 700; cursor: pointer; flex-shrink: 0;
+        }
+        .yt-back-btn:hover { background: var(--accent); color: #000; }
+        .yt-video-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 14px; width: 100%;
+        }
+        .yt-video-card {
+            background: var(--panel-bg); backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-color); border-radius: 18px;
+            overflow: hidden; cursor: pointer; transition: 0.25s;
+            box-shadow: var(--card-shadow); display: flex; flex-direction: column;
+        }
+        .yt-video-card:hover {
+            border-color: var(--accent); transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 255, 136, 0.3);
+        }
+        .yt-thumb-wrap { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; overflow: hidden; }
+        .yt-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .yt-thumb-play {
+            position: absolute; bottom: 8px; right: 8px;
+            background: rgba(0, 0, 0, 0.78); color: var(--accent);
+            border: 1px solid var(--border-color); border-radius: 12px;
+            padding: 3px 9px; font-size: 10px; font-weight: 800;
+        }
+        .yt-video-meta { padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+        .yt-video-title {
+            font-size: 13px; font-weight: 700; color: var(--text-main); line-height: 1.35;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .yt-video-date { font-size: 11px; color: var(--text-muted); }
 
         /* Category Cards Grid */
         .category-grid {
@@ -369,6 +415,7 @@
         @media (max-width: 768px) {
             .content-scroll { padding: 10px 15px 20px 15px; }
             .grid { grid-template-columns: 1fr; }
+            .yt-video-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -536,6 +583,28 @@
     </div>
 
 <script>
+    // --- YOUTUBE DATA API v3 CONFIGURATION ---
+    const DEFAULT_YT_API_KEY = 'AIzaSyDsEyGaVx_IGHPq37epyEPUwaWN1YA_a-w';
+    const DEFAULT_YT_CHANNELS = [
+        {
+            name: 'ARY Digital',
+            target: 'UCoNb-hzlrW7Lx05ZvCz2JaA',
+            logo: '',
+            category: 'social',
+            country: 'pk',
+            featured: true
+        }
+    ];
+    let activeYtPlaylistId = '';
+    let activeYtNextPageToken = '';
+    let activeYtChannelName = '';
+    let activeYtVideos = [];
+
+    function getYtApiKey() {
+        const saved = localStorage.getItem('fz_yt_api_key');
+        return (saved && saved.trim() !== '') ? saved.trim() : DEFAULT_YT_API_KEY;
+    }
+
     let touchStartY = 0;
     document.addEventListener('touchstart', function(e) {
         touchStartY = e.touches[0].clientY;
@@ -706,6 +775,10 @@
                     <div class="cat-icon-svg">🎵</div>
                     <div class="cat-title">MUSIC</div>
                 </div>
+                <div class="cat-glass-card" onclick="setCategory('social', null)">
+                    <div class="cat-icon-svg">▶️</div>
+                    <div class="cat-title">YOUTUBE CHANNELS</div>
+                </div>
                 <div class="cat-glass-card" onclick="setCategory('all', null)">
                     <div class="cat-icon-svg">📡</div>
                     <div class="cat-title">INTERNATIONAL</div>
@@ -762,10 +835,38 @@
     let favorites = JSON.parse(localStorage.getItem('fz_favorites')) || [];
     let hls = null;
 
+    const YT_SVG_ICON = `<svg width="22" height="22" viewBox="0 0 24 24" fill="#ff0000"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`;
+
     async function loadChannels() {
         try {
             let customStreams = [];
             try { customStreams = JSON.parse(localStorage.getItem('fz_custom_streams')) || []; } catch(e) { customStreams = []; }
+
+            let adminYtChannels = [];
+            try { adminYtChannels = JSON.parse(localStorage.getItem('fz_yt_channels')) || []; } catch(e) { adminYtChannels = []; }
+
+            // Combine default YT channels with admin-added YT channels (avoiding duplicates)
+            let combinedYtChannels = [...adminYtChannels];
+            DEFAULT_YT_CHANNELS.forEach(defCh => {
+                if (!combinedYtChannels.some(c => c.target === defCh.target)) {
+                    combinedYtChannels.push(defCh);
+                }
+            });
+
+            let formattedYtChannels = combinedYtChannels.map((yt, idx) => {
+                let icon = (yt.logo && yt.logo.trim() !== '') ? `<img src="${yt.logo}" alt="logo">` : YT_SVG_ICON;
+                return {
+                    id: 'ytch_' + idx + '_' + yt.target,
+                    name: (yt.featured ? '★ ' : '') + yt.name,
+                    url: 'ytchannel://' + yt.target,
+                    ytTarget: yt.target,
+                    isYtChannel: true,
+                    category: yt.category || 'social',
+                    country: yt.country || 'social',
+                    icon: icon,
+                    featured: !!yt.featured
+                };
+            });
 
             let formattedCustom = customStreams.map(s => {
                 let icon = '📡';
@@ -774,7 +875,7 @@
                 } else {
                     let urlLower = s.url.toLowerCase();
                     if(urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
-                        icon = `<svg width="22" height="22" viewBox="0 0 24 24" fill="#ff0000"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`;
+                        icon = YT_SVG_ICON;
                     } else if(urlLower.includes('facebook.com')) {
                         icon = `<svg width="22" height="22" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`;
                     }
@@ -790,8 +891,8 @@
                 };
             });
 
-            let featuredCustom = formattedCustom.filter(c => c.featured);
-            let normalCustom = formattedCustom.filter(c => !c.featured);
+            let featuredCustom = [...formattedYtChannels.filter(c => c.featured), ...formattedCustom.filter(c => c.featured)];
+            let normalCustom = [...formattedYtChannels.filter(c => !c.featured), ...formattedCustom.filter(c => !c.featured)];
 
             const [chRes, stRes] = await Promise.all([
                 fetch('https://iptv-org.github.io/api/channels.json'),
@@ -844,7 +945,11 @@
     window.toggleFavorite = function(event, id, name, url, icon, category, country) {
         event.stopPropagation(); 
         let index = favorites.findIndex(f => f.url === url);
-        if(index > -1) { favorites.splice(index, 1); } else { favorites.push({id, name, url, icon, category, country}); }
+        let isYtChannel = url.startsWith('ytchannel://');
+        let ytTarget = isYtChannel ? url.replace('ytchannel://', '') : '';
+        let favIcon = isYtChannel ? YT_SVG_ICON : (icon || getCountryFlag(country));
+
+        if(index > -1) { favorites.splice(index, 1); } else { favorites.push({id, name, url, icon: favIcon, category, country, isYtChannel, ytTarget}); }
         localStorage.setItem('fz_favorites', JSON.stringify(favorites));
         const btn = event.target;
         if (index > -1) { btn.classList.remove('active'); btn.innerText = "🤍"; } else { btn.classList.add('active'); btn.innerText = "❤️"; }
@@ -880,19 +985,31 @@
             let heartClass = isFav ? "fav-btn active" : "fav-btn";
             let heartIcon = isFav ? "❤️" : "🤍";
             let safeName = ch.name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+            let isYtCh = ch.isYtChannel || (ch.url && ch.url.startsWith('ytchannel://'));
+            let ytTarget = ch.ytTarget || (isYtCh ? ch.url.replace('ytchannel://', '') : '');
+
+            let clickAction = isYtCh
+                ? `openYouTubeChannel(${JSON.stringify(ytTarget)}, "${safeName}")`
+                : `openPlayer(${JSON.stringify(ch.url)}, "${safeName}")`;
+
+            let btnHtml = isYtCh
+                ? `<button class="play-btn yt-ch-btn">VIDEOS</button>`
+                : `<button class="play-btn">PLAY</button>`;
+
+            let catSub = isYtCh ? `YouTube Full Channel • ${ch.country.toUpperCase()}` : `${ch.category} • ${ch.country.toUpperCase()}`;
 
             html += `
-                <div class="card" onclick='openPlayer(${JSON.stringify(ch.url)}, "${safeName}")'>
+                <div class="card" onclick='${clickAction}'>
                     <div class="card-left">
-                        <div class="card-icon">${ch.icon}</div>
+                        <div class="card-icon">${ch.icon || YT_SVG_ICON}</div>
                         <div class="card-info">
                             <div class="card-name" title="${safeName}">${ch.name}</div>
-                            <div class="card-cat">${ch.category} • ${ch.country.toUpperCase()}</div>
+                            <div class="card-cat">${catSub}</div>
                         </div>
                     </div>
                     <div class="card-right">
                         <button class="${heartClass}" onclick='toggleFavorite(event, "${ch.id}", "${safeName}", ${JSON.stringify(ch.url)}, "", "${ch.category}", "${ch.country}")'>${heartIcon}</button>
-                        <button class="play-btn">PLAY</button>
+                        ${btnHtml}
                     </div>
                 </div>
             `;
@@ -909,6 +1026,192 @@
     }
 
     window.loadMoreChannels = function() { appendChannelsBatch(currentList); }
+
+    // --- FULL YOUTUBE CHANNEL & PLAYLIST BROWSER (YouTube Data API v3) ---
+    async function resolveYouTubePlaylistId(rawTarget, apiKey) {
+        let t = rawTarget.trim();
+        // Direct Playlist ID or Playlist URL
+        if (t.includes('list=')) {
+            return t.split('list=')[1].split('&')[0];
+        }
+        if (/^(PL|UU|OLAK|RD)[a-zA-Z0-9_-]+$/.test(t)) {
+            return t;
+        }
+        // Channel URL with /channel/UC...
+        if (t.includes('/channel/UC')) {
+            let ucId = t.split('/channel/')[1].split(/[/?#]/)[0];
+            return 'UU' + ucId.substring(2);
+        }
+        // Direct UC Channel ID -> convert UC to UU (1 unit quota!)
+        if (t.startsWith('UC') && t.length >= 20) {
+            return 'UU' + t.substring(2);
+        }
+        // Handle (@username or full youtube.com/@username URL)
+        let handle = t;
+        if (handle.includes('@')) {
+            handle = '@' + handle.split('@')[1].split(/[/?#]/)[0];
+        }
+        const cacheKey = 'fz_yt_handle_' + handle.toLowerCase();
+        const cachedPl = localStorage.getItem(cacheKey);
+        if (cachedPl) return cachedPl;
+
+        const res = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&forHandle=${encodeURIComponent(handle)}&key=${encodeURIComponent(apiKey)}`);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.message || 'YouTube API Error');
+        if (data.items && data.items.length > 0) {
+            const uploadsId = data.items[0].contentDetails.relatedPlaylists.uploads;
+            localStorage.setItem(cacheKey, uploadsId);
+            return uploadsId;
+        }
+        throw new Error('Channel not found. Check Channel ID or @handle.');
+    }
+
+    async function openYouTubeChannel(target, channelName) {
+        const apiKey = getYtApiKey();
+        const banner = document.getElementById('promoBannerCard');
+        if (banner) banner.classList.add('player-open');
+        document.getElementById('loadMoreBtn').style.display = 'none';
+        document.getElementById('pageTitle').innerText = `▶️ ${channelName}`;
+        document.getElementById('totalCountBadge').innerText = 'Loading...';
+
+        const container = document.getElementById('dynamicViewContainer');
+        container.innerHTML = `
+            <div class="yt-channel-topbar">
+                <button class="yt-back-btn" onclick="backFromYtChannel()">⬅ Back to Channels</button>
+                <span style="font-size:12px; color:var(--text-muted); font-weight:600;">Latest & Old Videos</span>
+            </div>
+            <div style="color:var(--accent); text-align:center; padding:40px;">Fetching videos from YouTube...</div>
+        `;
+        document.getElementById('scrollArea').scrollTop = 0;
+
+        activeYtChannelName = channelName;
+        activeYtVideos = [];
+        activeYtNextPageToken = '';
+
+        try {
+            const playlistId = await resolveYouTubePlaylistId(target, apiKey);
+            activeYtPlaylistId = playlistId;
+
+            // Check 30-min cache for first page
+            const cacheKey = 'fz_yt_cache_' + playlistId;
+            const cachedRaw = localStorage.getItem(cacheKey);
+            if (cachedRaw) {
+                try {
+                    const cached = JSON.parse(cachedRaw);
+                    if (Date.now() - cached.ts < 30 * 60 * 1000 && cached.items && cached.items.length > 0) {
+                        activeYtVideos = cached.items;
+                        activeYtNextPageToken = cached.nextPageToken || '';
+                        renderYouTubeChannelVideos();
+                        return;
+                    }
+                } catch(e) {}
+            }
+
+            await fetchYouTubePlaylistPage(playlistId, '', true);
+        } catch (err) {
+            document.getElementById('totalCountBadge').innerText = 'Error';
+            container.innerHTML = `
+                <div class="yt-channel-topbar">
+                    <button class="yt-back-btn" onclick="backFromYtChannel()">⬅ Back to Channels</button>
+                    <span style="font-size:12px; color:#ff5252;">Unable to load</span>
+                </div>
+                <div style="color:#ff5252; text-align:center; padding:30px; font-size:13px;">
+                    ${err.message || 'Could not load YouTube videos.'}<br><br>
+                    <small style="color:var(--text-muted);">Make sure you are opening the site from https://livetvfz.github.io/Live-TV-FZ/ so the restricted API key is accepted.</small>
+                </div>
+            `;
+        }
+    }
+
+    async function fetchYouTubePlaylistPage(playlistId, pageToken, saveToCache) {
+        const apiKey = getYtApiKey();
+        let url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=24&playlistId=${encodeURIComponent(playlistId)}&key=${encodeURIComponent(apiKey)}`;
+        if (pageToken) url += `&pageToken=${encodeURIComponent(pageToken)}`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.message || 'YouTube API Error');
+
+        const newItems = (data.items || [])
+            .filter(item => item.snippet && item.snippet.resourceId && item.snippet.resourceId.videoId && item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video')
+            .map(item => ({
+                videoId: item.snippet.resourceId.videoId,
+                title: item.snippet.title,
+                thumb: (item.snippet.thumbnails && (item.snippet.thumbnails.medium || item.snippet.thumbnails.high || item.snippet.thumbnails.default)) ? (item.snippet.thumbnails.medium || item.snippet.thumbnails.high || item.snippet.thumbnails.default).url : '',
+                publishedAt: item.snippet.publishedAt ? new Date(item.snippet.publishedAt).toLocaleDateString() : ''
+            }));
+
+        activeYtVideos = pageToken ? [...activeYtVideos, ...newItems] : newItems;
+        activeYtNextPageToken = data.nextPageToken || '';
+
+        if (saveToCache && !pageToken) {
+            try {
+                localStorage.setItem('fz_yt_cache_' + playlistId, JSON.stringify({
+                    ts: Date.now(),
+                    items: activeYtVideos,
+                    nextPageToken: activeYtNextPageToken
+                }));
+            } catch(e) {}
+        }
+
+        renderYouTubeChannelVideos();
+    }
+
+    function renderYouTubeChannelVideos() {
+        const container = document.getElementById('dynamicViewContainer');
+        document.getElementById('totalCountBadge').innerText = `${activeYtVideos.length} Videos`;
+
+        let cardsHtml = '';
+        activeYtVideos.forEach(v => {
+            const safeTitle = v.title.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+            const ytUrl = `https://www.youtube.com/watch?v=${v.videoId}`;
+            cardsHtml += `
+                <div class="yt-video-card" onclick='openPlayer(${JSON.stringify(ytUrl)}, "${safeTitle}")'>
+                    <div class="yt-thumb-wrap">
+                        <img src="${v.thumb}" alt="${safeTitle}" loading="lazy">
+                        <div class="yt-thumb-play">▶ PLAY</div>
+                    </div>
+                    <div class="yt-video-meta">
+                        <div class="yt-video-title" title="${safeTitle}">${v.title}</div>
+                        <div class="yt-video-date">📅 ${v.publishedAt}</div>
+                    </div>
+                </div>
+            `;
+        });
+
+        let loadMoreHtml = activeYtNextPageToken
+            ? `<button class="load-more-btn" style="display:block;" id="ytLoadMoreBtn" onclick="loadMoreYtVideos()">⬇ Load Older Videos</button>`
+            : '';
+
+        container.innerHTML = `
+            <div class="yt-channel-topbar">
+                <button class="yt-back-btn" onclick="backFromYtChannel()">⬅ Back to Channels</button>
+                <span style="font-size:12px; color:var(--accent); font-weight:700;">Auto-Updated Channel</span>
+            </div>
+            <div class="yt-video-grid">${cardsHtml || '<div style="color:var(--text-muted); padding:20px;">No videos found.</div>'}</div>
+            ${loadMoreHtml}
+        `;
+    }
+
+    async function loadMoreYtVideos() {
+        const btn = document.getElementById('ytLoadMoreBtn');
+        if (btn) { btn.innerText = 'Loading more videos...'; btn.disabled = true; }
+        try {
+            await fetchYouTubePlaylistPage(activeYtPlaylistId, activeYtNextPageToken, false);
+        } catch (err) {
+            if (btn) { btn.innerText = 'Error loading more. Tap to retry.'; btn.disabled = false; }
+        }
+    }
+
+    function backFromYtChannel() {
+        const banner = document.getElementById('promoBannerCard');
+        const activeNav = document.querySelector('.nav-item.active');
+        if (banner && activeNav && activeNav.innerText.includes('Home')) {
+            banner.classList.remove('player-open');
+        }
+        document.getElementById('pageTitle').innerText = "🌍 All Global Channels";
+        resetAndRender(currentList);
+    }
 
     function updateMenu(element) {
         if(element) {
@@ -930,7 +1233,7 @@
             currentList = allChannels;
             document.getElementById('pageTitle').innerText = "🌍 All Global Channels";
         } else if (cat === 'social') {
-            currentList = allChannels.filter(c => c.category === 'social' || c.country === 'social');
+            currentList = allChannels.filter(c => c.category === 'social' || c.country === 'social' || c.isYtChannel);
             document.getElementById('pageTitle').innerText = "▶️ YouTube & Social Live";
         } else {
             currentList = allChannels.filter(c => c.category.includes(cat));
@@ -1020,8 +1323,9 @@
         const video = document.getElementById('mainVideoPlayer');
         const iframe = document.getElementById('youtubePlayerFrame');
         const banner = document.getElementById('promoBannerCard');
+        const activeNav = document.querySelector('.nav-item.active');
         
-        if(banner && document.querySelector('.nav-item.active').innerText.includes('Home')) {
+        if(banner && activeNav && activeNav.innerText.includes('Home') && !document.getElementById('pageTitle').innerText.startsWith('▶️ ')) {
             banner.classList.remove('player-open');
         }
 
