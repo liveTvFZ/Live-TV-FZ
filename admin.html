@@ -155,32 +155,87 @@
         <div id="adminDashboard">
             <div class="dash-header">
                 <h2 style="font-size:17px; color:var(--text-main); margin:0;">🛡️ Control Center</h2>
-                <div style="display:flex; gap:8px;">
+                <div style="display:flex; gap:8px; align-items:center;">
                     <a href="index.html" class="btn btn-secondary" style="padding:7px 12px; font-size:11px;">⬅ App</a>
                     <button class="btn btn-secondary" onclick="logoutAdmin()" style="padding:7px 12px; font-size:11px;">🚪 Logout</button>
                 </div>
             </div>
 
-            <!-- Greeting Popup Manager -->
-            <div class="dash-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3>👋 Greeting Popup Manager</h3>
-                    <button class="btn btn-secondary" onclick="toggleSection('greetingFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+            <!-- 3-Icon Quick Switcher Bar (Popup, Maint, Cache — side-by-side icons with labels below) -->
+            <div class="dash-card" id="quickIconsCard" style="padding:14px 16px;">
+                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; text-align:center;">
+                    <button type="button" class="btn btn-secondary" id="tabIconPopup" onclick="selectQuickTab('popup')" style="flex-direction:column; gap:4px; padding:10px 6px; border-radius:16px;">
+                        <span style="font-size:18px;">👋</span>
+                        <span style="font-size:10px; font-weight:700;">Popup</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="tabIconMaint" onclick="selectQuickTab('maint')" style="flex-direction:column; gap:4px; padding:10px 6px; border-radius:16px;">
+                        <span style="font-size:18px;">🛠️</span>
+                        <span style="font-size:10px; font-size:10px; font-weight:700;">Maint</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="tabIconCache" onclick="selectQuickTab('cache')" style="flex-direction:column; gap:4px; padding:10px 6px; border-radius:16px;">
+                        <span style="font-size:18px;">🔄</span>
+                        <span style="font-size:10px; font-weight:700;">Cache</span>
+                    </button>
                 </div>
-                <div id="greetingFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
-                    <div class="form-group">
-                        <label>Main Title</label>
-                        <input type="text" id="greetingTitleInput" placeholder="Welcome LiveTV FZ">
+
+                <div id="quickControlsContainer" class="hidden" style="margin-top:14px; border-top:1px solid var(--border-color); padding-top:14px;">
+                    <!-- Merged Popup On/Off + Greeting Title, Note & Separate Colors -->
+                    <div id="quickSubPanelPopup" class="quick-subpanel">
+                        <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--border-color);">
+                            <div>
+                                <div style="font-size:12px; font-weight:700; color:var(--text-main);">👋 Welcome Popup On / Off</div>
+                                <div style="font-size:10px; color:var(--text-muted);">Enable or disable opening welcome note</div>
+                            </div>
+                            <input type="checkbox" id="welcomePopupEnabledToggle" style="width:18px; height:18px; accent-color:var(--accent);" onchange="toggleWelcomePopupEnabled(this.checked)">
+                        </div>
+                        <div class="form-group">
+                            <label>Main Title & Title Color</label>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <input type="text" id="greetingTitleInput" placeholder="Enter main title...">
+                                <input type="color" id="greetingTitleColorInput" value="#00ff88" title="Main Title Color" style="width:48px; height:42px; padding:4px; border-radius:12px; flex-shrink:0;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Greeting Subtitle / Note & Note Color</label>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <input type="text" id="greetingPoweredInput" placeholder="Enter greeting note...">
+                                <input type="color" id="greetingPoweredColorInput" value="#ffffff" title="Greeting Note Color" style="width:48px; height:42px; padding:4px; border-radius:12px; flex-shrink:0;">
+                            </div>
+                        </div>
+                        <button class="btn" onclick="saveGreeting()">Save Greeting Message</button>
                     </div>
-                    <div class="form-group">
-                        <label>Powered By Text</label>
-                        <input type="text" id="greetingPoweredInput" placeholder="powered by Zubi Facts Creation's">
+
+                    <div id="quickSubPanelMaint" class="quick-subpanel hidden">
+                        <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;">
+                            <div>
+                                <div style="font-size:12px; font-weight:700; color:#ff6b6b;">🛠️ Maintenance Mode Status</div>
+                                <div style="font-size:10px; color:var(--text-muted);">Turn maintenance screen On or Off</div>
+                            </div>
+                            <input type="checkbox" id="maintenanceModeToggle" style="width:18px; height:18px; accent-color:var(--accent);" onchange="toggleMaintenanceMode(this.checked)">
+                        </div>
+                        <div class="form-group" style="margin-bottom:8px;">
+                            <label>Maintenance Message & Text Color</label>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <input type="text" id="maintenanceMsgInput" placeholder="App is under scheduled maintenance...">
+                                <input type="color" id="maintenanceColorInput" value="#cbd5e1" style="width:48px; height:42px; padding:4px; border-radius:12px; flex-shrink:0;">
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="saveMaintenanceMessage()" style="padding:6px 12px; font-size:11px;">Save Maintenance Note</button>
                     </div>
-                    <button class="btn" onclick="saveGreeting()">Save Greeting Message</button>
+
+                    <div id="quickSubPanelCache" class="quick-subpanel hidden">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                            <div>
+                                <div style="font-size:12px; font-weight:700; color:var(--text-main);">🔄 YouTube Video Cache</div>
+                                <div style="font-size:10px; color:var(--text-muted);">Clear 30-min cache to fetch fresh videos now</div>
+                            </div>
+                            <button class="btn" onclick="clearYtCacheNow()" style="padding:7px 14px; font-size:11px;">Clear Cache Now</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- YouTube Full Channel & Playlist Manager -->
+            <!-- 1. YouTube Full Channel & Playlist Manager -->
             <div class="dash-card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3>▶️ YouTube Full Channel & Playlist Manager</h3>
@@ -190,11 +245,11 @@
                     <input type="hidden" id="editYtIndex" value="-1">
                     <div class="form-group">
                         <label>Channel / Playlist Display Name</label>
-                        <input type="text" id="ytChName" placeholder="e.g. ARY Digital">
+                        <input type="text" id="ytChName" placeholder="e.g. ZubiFacts Creations">
                     </div>
                     <div class="form-group">
                         <label>Channel ID (UC...), Playlist ID (PL...), or @Handle URL</label>
-                        <input type="text" id="ytChTarget" placeholder="UCoNb-hzlrW7Lx05ZvCz2JaA or @arydigitalasia or PL...">
+                        <input type="text" id="ytChTarget" placeholder="@zubifactscreations or UC... or PL...">
                     </div>
                     <div class="form-group">
                         <label>Custom Logo (Option 1: Image URL)</label>
@@ -219,7 +274,7 @@
                         </div>
                         <div class="form-group">
                             <label>Country Code</label>
-                            <input type="text" id="ytChCountry" placeholder="pk, in, social">
+                            <input type="text" id="ytChCountry" placeholder="om, pk, in, social">
                         </div>
                     </div>
                     <div class="form-group" style="display:flex; align-items:center; gap:8px; margin-top:6px;">
@@ -234,157 +289,7 @@
                 <div class="table-container" id="ytChannelsTableWrapper"></div>
             </div>
 
-            <!-- AdMob Manager -->
-            <div class="dash-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3>💰 Google AdMob Banner Manager</h3>
-                    <button class="btn btn-secondary" onclick="toggleSection('adMobFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
-                </div>
-                <div id="adMobFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
-                    <div class="form-group">
-                        <label>AdMob Banner Unit ID</label>
-                        <input type="text" id="admobInput" placeholder="ca-app-pub-xxxxxxxx/xxxxxxxx">
-                    </div>
-                    <button class="btn" onclick="saveAdMob()">Save AdMob ID</button>
-                </div>
-            </div>
-
-            <!-- Google AdSense Manager -->
-            <div class="dash-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3>🎯 Google AdSense Manager</h3>
-                    <button class="btn btn-secondary" onclick="toggleSection('adSenseFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
-                </div>
-                <div id="adSenseFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
-                    <div class="form-group">
-                        <label>AdSense Slot / Client ID</label>
-                        <input type="text" id="adsenseInput" placeholder="ca-pub-xxxxxxxxxxxxxxxx">
-                    </div>
-                    <button class="btn" onclick="saveAdSense()">Save AdSense ID</button>
-                </div>
-            </div>
-
-            <!-- Affiliate Links Manager -->
-            <div class="dash-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3>🤝 Affiliate Links Manager</h3>
-                    <button class="btn btn-secondary" onclick="toggleSection('affiliateFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
-                </div>
-                <div id="affiliateFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
-                    <input type="hidden" id="editAffiliateIndex" value="-1">
-                    <div class="form-group">
-                        <label>Affiliate / Promotion Title</label>
-                        <input type="text" id="affiliateTitle" placeholder="e.g. Special Offer Product">
-                    </div>
-                    <div class="form-group">
-                        <label>Affiliate Target URL</label>
-                        <input type="text" id="affiliateUrl" placeholder="https://...">
-                    </div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn" onclick="saveAffiliateLink()">Save Affiliate Link</button>
-                        <button class="btn btn-secondary" onclick="closeAffiliateForm()">Cancel</button>
-                    </div>
-                </div>
-                <div class="table-container" id="affiliateTableWrapper"></div>
-            </div>
-
-            <!-- Ticker Manager -->
-            <div class="dash-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3>📢 Running Ticker Message</h3>
-                    <button class="btn btn-secondary" onclick="toggleSection('tickerFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
-                </div>
-                <div id="tickerFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
-                    <div class="form-group">
-                        <label>Ticker Announcement Text</label>
-                        <input type="text" id="tickerInput" placeholder="Enter ticker message...">
-                    </div>
-                    <button class="btn" onclick="saveTicker()">Publish Ticker</button>
-                </div>
-            </div>
-
-            <!-- Announcement / Special Notice Manager -->
-            <div class="dash-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3>🔔 Announcement / Special Notice</h3>
-                    <button class="btn btn-secondary" onclick="toggleSection('announcementFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
-                </div>
-                <div id="announcementFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
-                    <div class="form-group">
-                        <label>Special Announcement / Notice Text (Leave blank to hide)</label>
-                        <input type="text" id="announcementInput" placeholder="e.g. New episodes & channels live now!">
-                    </div>
-                    <button class="btn" onclick="saveAnnouncement()">Save Announcement</button>
-                </div>
-            </div>
-
-            <!-- Quick App Controls (Welcome Popup Switch & YT Cache Reset) -->
-            <div class="dash-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3>⚙️ Quick App Controls</h3>
-                    <button class="btn btn-secondary" onclick="toggleSection('quickControlsContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
-                </div>
-                <div id="quickControlsContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
-                    <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                        <div>
-                            <div style="font-size:12px; font-weight:700; color:var(--text-main);">Welcome Popup On / Off</div>
-                            <div style="font-size:10px; color:var(--text-muted);">Show or disable opening banner popup</div>
-                        </div>
-                        <input type="checkbox" id="welcomePopupEnabledToggle" style="width:18px; height:18px; accent-color:var(--accent);" onchange="toggleWelcomePopupEnabled(this.checked)">
-                    </div>
-                    <hr style="border:none; border-top:1px solid var(--border-color); margin:12px 0;">
-                    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                        <div>
-                            <div style="font-size:12px; font-weight:700; color:var(--text-main);">Refresh YouTube Video Cache</div>
-                            <div style="font-size:10px; color:var(--text-muted);">Clear 30-min cached lists to fetch latest videos now</div>
-                        </div>
-                        <button class="btn btn-secondary" onclick="clearYtCacheNow()" style="padding:6px 12px; font-size:11px;">🔄 Clear Cache</button>
-                    </div>
-                    <hr style="border:none; border-top:1px solid var(--border-color); margin:12px 0;">
-                    <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;">
-                        <div>
-                            <div style="font-size:12px; font-weight:700; color:#ff6b6b;">🛠️ Maintenance Mode On / Off</div>
-                            <div style="font-size:10px; color:var(--text-muted);">Show maintenance screen on Live TV FZ app</div>
-                        </div>
-                        <input type="checkbox" id="maintenanceModeToggle" style="width:18px; height:18px; accent-color:var(--accent);" onchange="toggleMaintenanceMode(this.checked)">
-                    </div>
-                    <div class="form-group" style="margin-bottom:8px;">
-                        <label>Maintenance Message (Optional)</label>
-                        <input type="text" id="maintenanceMsgInput" placeholder="App is under scheduled maintenance. Please check back shortly.">
-                    </div>
-                    <button class="btn btn-secondary" onclick="saveMaintenanceMessage()" style="padding:6px 12px; font-size:11px;">Save Maintenance Note</button>
-                </div>
-            </div>
-
-            <!-- Social Links Manager -->
-            <div class="dash-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3>🌐 Social & Facebook Links Manager</h3>
-                    <button class="btn btn-secondary" onclick="toggleSection('socialFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
-                </div>
-                <div id="socialFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
-                    <input type="hidden" id="editSocialIndex" value="-1">
-                    <div class="form-group">
-                        <label>Platform Type</label>
-                        <select id="socialPlatform">
-                            <option value="telegram">Telegram</option>
-                            <option value="whatsapp">WhatsApp</option>
-                            <option value="facebook">Facebook Page / Link</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Channel / Page Link URL</label>
-                        <input type="text" id="socialUrl" placeholder="https://...">
-                    </div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn" onclick="saveSocialLink()">Save Link</button>
-                        <button class="btn btn-secondary" onclick="closeSocialForm()">Cancel</button>
-                    </div>
-                </div>
-                <div class="table-container" id="socialTableWrapper"></div>
-            </div>
-
-            <!-- Custom Streams Manager -->
+            <!-- 2. Custom Streams & Pinned Channels -->
             <div class="dash-card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3>📺 Custom Streams & Pinned Channels</h3>
@@ -438,7 +343,122 @@
                 <div class="table-container" id="streamsTableWrapper"></div>
             </div>
 
-            <!-- Separate & Locked YouTube API Key Vault -->
+            <!-- 3. Social & Facebook Links Manager -->
+            <div class="dash-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>🌐 Social & Facebook Links Manager</h3>
+                    <button class="btn btn-secondary" onclick="toggleSection('socialFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+                </div>
+                <div id="socialFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
+                    <input type="hidden" id="editSocialIndex" value="-1">
+                    <div class="form-group">
+                        <label>Platform Type</label>
+                        <select id="socialPlatform">
+                            <option value="telegram">Telegram</option>
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="facebook">Facebook Page / Link</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Channel / Page Link URL</label>
+                        <input type="text" id="socialUrl" placeholder="https://...">
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn" onclick="saveSocialLink()">Save Link</button>
+                        <button class="btn btn-secondary" onclick="closeSocialForm()">Cancel</button>
+                    </div>
+                </div>
+                <div class="table-container" id="socialTableWrapper"></div>
+            </div>
+
+            <!-- 4. Announcement / Special Notice Manager -->
+            <div class="dash-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>🔔 Announcement / Special Notice</h3>
+                    <button class="btn btn-secondary" onclick="toggleSection('announcementFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+                </div>
+                <div id="announcementFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
+                    <div class="form-group">
+                        <label>Special Announcement / Notice Text & Color</label>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <input type="text" id="announcementInput" placeholder="e.g. New episodes & channels live now!">
+                            <input type="color" id="announcementColorInput" value="#00ff88" style="width:48px; height:42px; padding:4px; border-radius:12px; flex-shrink:0;">
+                        </div>
+                    </div>
+                    <button class="btn" onclick="saveAnnouncement()">Save Announcement</button>
+                </div>
+            </div>
+
+            <!-- 5. Running Ticker Message -->
+            <div class="dash-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>📢 Running Ticker Message</h3>
+                    <button class="btn btn-secondary" onclick="toggleSection('tickerFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+                </div>
+                <div id="tickerFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
+                    <div class="form-group">
+                        <label>Ticker Announcement Text & Color</label>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <input type="text" id="tickerInput" placeholder="Enter ticker message...">
+                            <input type="color" id="tickerColorInput" value="#00ff88" style="width:48px; height:42px; padding:4px; border-radius:12px; flex-shrink:0;">
+                        </div>
+                    </div>
+                    <button class="btn" onclick="saveTicker()">Publish Ticker</button>
+                </div>
+            </div>
+
+            <!-- App Controls Below -->
+            <div class="dash-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>💰 Google AdMob Banner Manager</h3>
+                    <button class="btn btn-secondary" onclick="toggleSection('adMobFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+                </div>
+                <div id="adMobFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
+                    <div class="form-group">
+                        <label>AdMob Banner Unit ID</label>
+                        <input type="text" id="admobInput" placeholder="ca-app-pub-xxxxxxxx/xxxxxxxx">
+                    </div>
+                    <button class="btn" onclick="saveAdMob()">Save AdMob ID</button>
+                </div>
+            </div>
+
+            <div class="dash-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>🤝 Affiliate Links Manager</h3>
+                    <button class="btn btn-secondary" onclick="toggleSection('affiliateFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+                </div>
+                <div id="affiliateFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
+                    <input type="hidden" id="editAffiliateIndex" value="-1">
+                    <div class="form-group">
+                        <label>Affiliate / Promotion Title</label>
+                        <input type="text" id="affiliateTitle" placeholder="e.g. Special Offer Product">
+                    </div>
+                    <div class="form-group">
+                        <label>Affiliate Target URL</label>
+                        <input type="text" id="affiliateUrl" placeholder="https://...">
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn" onclick="saveAffiliateLink()">Save Affiliate Link</button>
+                        <button class="btn btn-secondary" onclick="closeAffiliateForm()">Cancel</button>
+                    </div>
+                </div>
+                <div class="table-container" id="affiliateTableWrapper"></div>
+            </div>
+
+            <div class="dash-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>🎯 Google AdSense Manager</h3>
+                    <button class="btn btn-secondary" onclick="toggleSection('adSenseFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+                </div>
+                <div id="adSenseFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
+                    <div class="form-group">
+                        <label>AdSense Slot / Client ID</label>
+                        <input type="text" id="adsenseInput" placeholder="ca-pub-xxxxxxxxxxxxxxxx">
+                    </div>
+                    <button class="btn" onclick="saveAdSense()">Save AdSense ID</button>
+                </div>
+            </div>
+
             <div class="dash-card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
@@ -459,7 +479,6 @@
                 </div>
             </div>
 
-            <!-- Security Credentials (Password Change Option Restored) -->
             <div class="dash-card" style="border: 1px solid rgba(255, 82, 82, 0.4);">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
@@ -480,6 +499,8 @@
     </div>
 
     <script>
+        let activeQuickTab = 'popup';
+
         window.addEventListener('DOMContentLoaded', () => {
             if(localStorage.getItem('fz_admin_logged') === 'true') {
                 showDashboard();
@@ -505,23 +526,27 @@
             document.getElementById('adminPass').value = '';
         }
 
+        function ensureZubiChannelEditable() {
+            let existing = getYtChannels();
+            const hasZubi = existing.some(c => (c.target || '').toLowerCase().includes('zubifactscreations') || (c.name || '').toLowerCase().includes('zubifacts'));
+            if (!hasZubi) {
+                existing.unshift({
+                    name: 'ZubiFacts Creations',
+                    target: '@zubifactscreations',
+                    logo: '',
+                    category: 'social',
+                    country: 'om',
+                    featured: true
+                });
+                localStorage.setItem('fz_yt_channels', JSON.stringify(existing));
+            }
+            localStorage.setItem('fz_yt_channels_seeded_v1', 'true');
+        }
+
         function showDashboard() {
             document.getElementById('loginWrapper').style.display = 'none';
             document.getElementById('adminDashboard').style.display = 'block';
-            if (!localStorage.getItem('fz_yt_channels_seeded_v1')) {
-                let existing = getYtChannels();
-                if (existing.length === 0) {
-                    localStorage.setItem('fz_yt_channels', JSON.stringify([{
-                        name: 'ZubiFacts Creations',
-                        target: '@zubifactscreations',
-                        logo: '',
-                        category: 'social',
-                        country: 'om',
-                        featured: true
-                    }]));
-                }
-                localStorage.setItem('fz_yt_channels_seeded_v1', 'true');
-            }
+            ensureZubiChannelEditable();
             loadAds();
             loadGreeting();
             loadTicker();
@@ -543,18 +568,76 @@
             }
         }
 
+        function toggleQuickIconPanel() {
+            const box = document.getElementById('quickControlsContainer');
+            if (!box) return;
+            if (box.classList.contains('hidden')) {
+                box.classList.remove('hidden');
+                showQuickSubPanel(activeQuickTab);
+            } else {
+                box.classList.add('hidden');
+            }
+        }
+
+        function showQuickSubPanel(tabName) {
+            const panels = {
+                popup: 'quickSubPanelPopup',
+                maint: 'quickSubPanelMaint',
+                cache: 'quickSubPanelCache'
+            };
+            Object.entries(panels).forEach(([k, id]) => {
+                const el = document.getElementById(id);
+                const btn = document.getElementById('tabIcon' + k.charAt(0).toUpperCase() + k.slice(1));
+                if (el) {
+                    if (k === tabName) el.classList.remove('hidden');
+                    else el.classList.add('hidden');
+                }
+                if (btn) {
+                    if (k === tabName) {
+                        btn.style.borderColor = 'var(--accent)';
+                        btn.style.background = 'rgba(0, 255, 136, 0.16)';
+                    } else {
+                        btn.style.borderColor = 'var(--border-color)';
+                        btn.style.background = 'rgba(255,255,255,0.1)';
+                    }
+                }
+            });
+        }
+
+        function selectQuickTab(tabName) {
+            const box = document.getElementById('quickControlsContainer');
+            if (!box) return;
+            if (!box.classList.contains('hidden') && activeQuickTab === tabName) {
+                box.classList.add('hidden');
+                return;
+            }
+            activeQuickTab = tabName;
+            box.classList.remove('hidden');
+            showQuickSubPanel(tabName);
+        }
+
         function loadGreeting() {
             document.getElementById('greetingTitleInput').value = localStorage.getItem('fz_greeting_title') || '';
             document.getElementById('greetingPoweredInput').value = localStorage.getItem('fz_greeting_powered') || '';
+            const fb = localStorage.getItem('fz_greeting_color') || '';
+            const tc = document.getElementById('greetingTitleColorInput');
+            const sc = document.getElementById('greetingPoweredColorInput');
+            if (tc) tc.value = localStorage.getItem('fz_greeting_title_color') || fb || '#00ff88';
+            if (sc) sc.value = localStorage.getItem('fz_greeting_powered_color') || fb || '#ffffff';
         }
 
         function saveGreeting() {
             const title = document.getElementById('greetingTitleInput').value.trim();
             const powered = document.getElementById('greetingPoweredInput').value.trim();
+            const tColor = document.getElementById('greetingTitleColorInput') ? document.getElementById('greetingTitleColorInput').value : '#00ff88';
+            const pColor = document.getElementById('greetingPoweredColorInput') ? document.getElementById('greetingPoweredColorInput').value : '#ffffff';
             localStorage.setItem('fz_greeting_title', title);
             localStorage.setItem('fz_greeting_powered', powered);
-            alert(title || powered ? 'Greeting message updated successfully!' : 'Greeting cleared! Only banner will show.');
-            document.getElementById('greetingFormContainer').classList.add('hidden');
+            localStorage.setItem('fz_greeting_title_color', tColor);
+            localStorage.setItem('fz_greeting_powered_color', pColor);
+            alert(title || powered ? 'Greeting title, note & colors saved!' : 'Greeting cleared!');
+            const gForm = document.getElementById('greetingFormContainer');
+            if (gForm) gForm.classList.add('hidden');
         }
 
         function loadAds() {
@@ -700,45 +783,61 @@
 
         function loadTicker() {
             document.getElementById('tickerInput').value = localStorage.getItem('fz_ticker_text') || '';
+            const tc = document.getElementById('tickerColorInput');
+            if (tc) tc.value = localStorage.getItem('fz_ticker_color') || '#00ff88';
         }
 
         function saveTicker() {
-            localStorage.setItem('fz_ticker_text', document.getElementById('tickerInput').value.trim());
-            alert('Ticker updated!');
+            const txt = document.getElementById('tickerInput').value.trim();
+            const col = document.getElementById('tickerColorInput') ? document.getElementById('tickerColorInput').value : '#00ff88';
+            localStorage.setItem('fz_ticker_text', txt);
+            localStorage.setItem('fz_ticker_color', col);
+            alert('Ticker message & color published!');
             document.getElementById('tickerFormContainer').classList.add('hidden');
         }
 
         function loadAnnouncement() {
             const el = document.getElementById('announcementInput');
             if (el) el.value = localStorage.getItem('fz_announcement_text') || '';
+            const ac = document.getElementById('announcementColorInput');
+            if (ac) ac.value = localStorage.getItem('fz_announcement_color') || '#00ff88';
             const popToggle = document.getElementById('welcomePopupEnabledToggle');
             if (popToggle) popToggle.checked = (localStorage.getItem('fz_welcome_enabled') !== 'false');
             const mToggle = document.getElementById('maintenanceModeToggle');
             if (mToggle) mToggle.checked = (localStorage.getItem('fz_maintenance') === 'true');
             const mMsg = document.getElementById('maintenanceMsgInput');
             if (mMsg) mMsg.value = localStorage.getItem('fz_maintenance_msg') || '';
-        }
-
-        function toggleMaintenanceMode(isMaintOn) {
-            localStorage.setItem('fz_maintenance', isMaintOn ? 'true' : 'false');
-            alert(isMaintOn ? 'Maintenance Mode ON! App will show maintenance screen.' : 'Maintenance Mode OFF! App is live normally.');
-        }
-
-        function saveMaintenanceMessage() {
-            const msg = document.getElementById('maintenanceMsgInput').value.trim();
-            localStorage.setItem('fz_maintenance_msg', msg);
-            alert('Maintenance message saved!');
+            const mc = document.getElementById('maintenanceColorInput');
+            if (mc) mc.value = localStorage.getItem('fz_maintenance_color') || '#cbd5e1';
         }
 
         function saveAnnouncement() {
             const val = document.getElementById('announcementInput').value.trim();
+            const col = document.getElementById('announcementColorInput') ? document.getElementById('announcementColorInput').value : '#00ff88';
             localStorage.setItem('fz_announcement_text', val);
-            alert(val ? 'Announcement saved!' : 'Announcement cleared!');
+            localStorage.setItem('fz_announcement_color', col);
+            alert(val ? 'Announcement & color saved!' : 'Announcement cleared!');
             document.getElementById('announcementFormContainer').classList.add('hidden');
         }
 
         function toggleWelcomePopupEnabled(isEnabled) {
             localStorage.setItem('fz_welcome_enabled', isEnabled ? 'true' : 'false');
+            const popToggle = document.getElementById('welcomePopupEnabledToggle');
+            if (popToggle) popToggle.checked = isEnabled;
+        }
+
+        function toggleMaintenanceMode(isMaintOn) {
+            localStorage.setItem('fz_maintenance', isMaintOn ? 'true' : 'false');
+            const mToggle = document.getElementById('maintenanceModeToggle');
+            if (mToggle) mToggle.checked = isMaintOn;
+        }
+
+        function saveMaintenanceMessage() {
+            const msg = document.getElementById('maintenanceMsgInput').value.trim();
+            const col = document.getElementById('maintenanceColorInput') ? document.getElementById('maintenanceColorInput').value : '#cbd5e1';
+            localStorage.setItem('fz_maintenance_msg', msg);
+            localStorage.setItem('fz_maintenance_color', col);
+            alert('Maintenance message & color saved!');
         }
 
         function clearYtCacheNow() {
