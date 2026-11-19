@@ -331,6 +331,81 @@
                 <div class="table-container" id="streamsTableWrapper"></div>
             </div>
 
+            <!-- Separate & Locked YouTube API Key Vault -->
+            <div class="dash-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h3>🔑 YouTube API Key Vault</h3>
+                        <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Protected API key (Locked by default)</div>
+                    </div>
+                    <button class="btn btn-secondary" id="ytVaultToggleBtn" onclick="toggleYtVault()" style="padding:6px 12px; font-size:11px;">🔒 Unlock / Change</button>
+                </div>
+                <div id="ytApiVaultContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
+                    <div class="form-group">
+                        <label>YouTube Data API v3 Key</label>
+                        <input type="password" id="ytApiKeyInput" placeholder="AIzaSy..." readonly style="opacity:0.75;">
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn" id="saveYtKeyBtn" onclick="saveYtApiKey()" disabled style="opacity:0.5; cursor:not-allowed;">Save Key</button>
+                        <button class="btn btn-secondary" onclick="lockYtVault()">Lock</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- YouTube Full Channel & Playlist Manager -->
+            <div class="dash-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>▶️ YouTube Full Channel & Playlist Manager</h3>
+                    <button class="btn btn-secondary" onclick="toggleSection('ytChannelFormContainer', this)" style="padding:6px 12px; font-size:11px;">+ Open Trigger</button>
+                </div>
+                <div id="ytChannelFormContainer" class="hidden" style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
+                    <input type="hidden" id="editYtIndex" value="-1">
+                    <div class="form-group">
+                        <label>Channel / Playlist Display Name</label>
+                        <input type="text" id="ytChName" placeholder="e.g. ARY Digital">
+                    </div>
+                    <div class="form-group">
+                        <label>Channel ID (UC...), Playlist ID (PL...), or @Handle URL</label>
+                        <input type="text" id="ytChTarget" placeholder="UCoNb-hzlrW7Lx05ZvCz2JaA or @arydigitalasia or PL...">
+                    </div>
+                    <div class="form-group">
+                        <label>Custom Logo (Option 1: Image URL)</label>
+                        <input type="text" id="ytChLogo" placeholder="https://.../logo.png">
+                    </div>
+                    <div class="form-group">
+                        <label>Custom Logo (Option 2: Browse Image JPG/PNG)</label>
+                        <input type="file" id="ytChLogoFile" accept="image/png, image/jpeg, image/jpg" style="padding:8px; box-shadow:none; background:rgba(0,0,0,0.3); border-radius:15px;">
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="ytChCategory">
+                                <option value="social">YouTube & Social</option>
+                                <option value="entertainment">Entertainment</option>
+                                <option value="news">News</option>
+                                <option value="sports">Sports</option>
+                                <option value="movies">Movies</option>
+                                <option value="music">Music</option>
+                                <option value="kids">Kids</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Country Code</label>
+                            <input type="text" id="ytChCountry" placeholder="pk, in, social">
+                        </div>
+                    </div>
+                    <div class="form-group" style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                        <input type="checkbox" id="ytChFeatured" style="width:16px; height:16px; accent-color:var(--accent);">
+                        <label for="ytChFeatured" style="margin:0; color:var(--text-main); cursor:pointer; text-transform:none; font-size:11px;">⭐ Pin / Feature on absolute top</label>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <button class="btn" onclick="saveYtChannel()">Save YouTube Channel</button>
+                        <button class="btn btn-secondary" onclick="closeYtChannelForm()">Cancel</button>
+                    </div>
+                </div>
+                <div class="table-container" id="ytChannelsTableWrapper"></div>
+            </div>
+
             <!-- Security Credentials (Password Change Option Restored) -->
             <div class="dash-card" style="border: 1px solid rgba(255, 82, 82, 0.4);">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -386,6 +461,7 @@
             loadAffiliateLinks();
             loadSocialLinks();
             loadStreams();
+            loadYtChannels();
         }
 
         function toggleSection(containerId, btnElement) {
@@ -648,6 +724,142 @@
                 streams.splice(index, 1);
                 localStorage.setItem('fz_custom_streams', JSON.stringify(streams));
                 loadStreams();
+            }
+        }
+
+        // --- Separate & Locked YouTube API Key Vault ---
+        function toggleYtVault() {
+            const box = document.getElementById('ytApiVaultContainer');
+            const input = document.getElementById('ytApiKeyInput');
+            const saveBtn = document.getElementById('saveYtKeyBtn');
+            const toggleBtn = document.getElementById('ytVaultToggleBtn');
+
+            if (box.classList.contains('hidden')) {
+                box.classList.remove('hidden');
+                input.type = 'text';
+                input.removeAttribute('readonly');
+                input.style.opacity = '1';
+                saveBtn.disabled = false;
+                saveBtn.style.opacity = '1';
+                saveBtn.style.cursor = 'pointer';
+                if (toggleBtn) toggleBtn.innerText = '🔓 Unlocked';
+            } else {
+                lockYtVault();
+            }
+        }
+
+        function lockYtVault() {
+            const box = document.getElementById('ytApiVaultContainer');
+            const input = document.getElementById('ytApiKeyInput');
+            const saveBtn = document.getElementById('saveYtKeyBtn');
+            const toggleBtn = document.getElementById('ytVaultToggleBtn');
+
+            input.type = 'password';
+            input.setAttribute('readonly', 'readonly');
+            input.style.opacity = '0.75';
+            saveBtn.disabled = true;
+            saveBtn.style.opacity = '0.5';
+            saveBtn.style.cursor = 'not-allowed';
+            box.classList.add('hidden');
+            if (toggleBtn) toggleBtn.innerText = '🔒 Unlock / Change';
+        }
+
+        // --- YouTube Full Channel & Playlist Manager ---
+        function getYtChannels() {
+            try { return JSON.parse(localStorage.getItem('fz_yt_channels')) || []; } catch(e) { return []; }
+        }
+
+        function saveYtApiKey() {
+            const key = document.getElementById('ytApiKeyInput').value.trim();
+            if(!key) { alert('Enter a valid YouTube API Key!'); return; }
+            localStorage.setItem('fz_yt_api_key', key);
+            lockYtVault();
+            alert('YouTube API Key saved and locked successfully!');
+        }
+
+        function closeYtChannelForm() {
+            document.getElementById('ytChannelFormContainer').classList.add('hidden');
+        }
+
+        function saveYtChannel() {
+            const name = document.getElementById('ytChName').value.trim();
+            const target = document.getElementById('ytChTarget').value.trim();
+            const category = document.getElementById('ytChCategory').value;
+            const country = document.getElementById('ytChCountry').value.trim() || 'social';
+            const featured = document.getElementById('ytChFeatured').checked;
+            const editIndex = parseInt(document.getElementById('editYtIndex').value);
+
+            if(!name || !target) { alert('Channel Name and ID/Handle/Playlist are required!'); return; }
+
+            const logoUrlInput = document.getElementById('ytChLogo').value.trim();
+            const logoFileInput = document.getElementById('ytChLogoFile');
+
+            if (logoFileInput.files && logoFileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    finishSaveYtChannel(name, target, e.target.result, category, country, featured, editIndex);
+                };
+                reader.readAsDataURL(logoFileInput.files[0]);
+            } else {
+                finishSaveYtChannel(name, target, logoUrlInput, category, country, featured, editIndex);
+            }
+        }
+
+        function finishSaveYtChannel(name, target, logo, category, country, featured, editIndex) {
+            let list = getYtChannels();
+            const item = { name, target, logo, category, country, featured };
+            if(editIndex === -1) { list.push(item); } else { list[editIndex] = item; }
+            localStorage.setItem('fz_yt_channels', JSON.stringify(list));
+            loadYtChannels();
+            closeYtChannelForm();
+
+            document.getElementById('ytChName').value = '';
+            document.getElementById('ytChTarget').value = '';
+            document.getElementById('ytChLogo').value = '';
+            document.getElementById('ytChLogoFile').value = '';
+            document.getElementById('ytChCountry').value = '';
+            document.getElementById('ytChFeatured').checked = false;
+            document.getElementById('editYtIndex').value = '-1';
+
+            alert('YouTube Channel saved successfully!');
+        }
+
+        function loadYtChannels() {
+            document.getElementById('ytApiKeyInput').value = localStorage.getItem('fz_yt_api_key') || 'AIzaSyDsEyGaVx_IGHPq37epyEPUwaWN1YA_a-w';
+            const list = getYtChannels();
+            const wrapper = document.getElementById('ytChannelsTableWrapper');
+            if(list.length === 0) {
+                wrapper.innerHTML = `<div class="empty-notice">Default channel (ARY Digital) is active. Add more channels or playlists above.</div>`;
+                return;
+            }
+            let html = `<table><thead><tr><th style="width:40%;">Name</th><th style="width:35%;">ID / Handle</th><th style="width:25%;">Actions</th></tr></thead><tbody>`;
+            list.forEach((c, index) => {
+                html += `<tr><td><b>${c.name}</b></td><td>${c.target}</td><td class="actions-cell"><button class="action-sm edit-btn" onclick="editYtChannel(${index})">Edit</button><button class="action-sm del-btn" onclick="deleteYtChannel(${index})">Del</button></td></tr>`;
+            });
+            html += `</tbody></table>`;
+            wrapper.innerHTML = html;
+        }
+
+        function editYtChannel(index) {
+            const list = getYtChannels();
+            const c = list[index];
+            document.getElementById('editYtIndex').value = index;
+            document.getElementById('ytChName').value = c.name;
+            document.getElementById('ytChTarget').value = c.target;
+            document.getElementById('ytChLogo').value = c.logo && !c.logo.startsWith('data:') ? c.logo : '';
+            document.getElementById('ytChLogoFile').value = '';
+            document.getElementById('ytChCategory').value = c.category || 'social';
+            document.getElementById('ytChCountry').value = c.country || 'social';
+            document.getElementById('ytChFeatured').checked = !!c.featured;
+            document.getElementById('ytChannelFormContainer').classList.remove('hidden');
+        }
+
+        function deleteYtChannel(index) {
+            if(confirm('Delete this YouTube channel?')) {
+                let list = getYtChannels();
+                list.splice(index, 1);
+                localStorage.setItem('fz_yt_channels', JSON.stringify(list));
+                loadYtChannels();
             }
         }
     </script>
